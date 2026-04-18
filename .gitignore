@@ -4,6 +4,7 @@
 # Python
 __pycache__/
 *.pyc
+*.pyo
 venv/
 *.egg-info/
 
@@ -21,3 +22,8 @@ build/
 
 # Misc
 *.log
+*.pt
+data/
+static/audio/
+static/scans/
+static/heatmaps/

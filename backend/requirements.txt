@@ -1,0 +1,18 @@
+flask
+flask-cors
+python-dotenv
+torch
+torchvision
+torchxrayvision
+grad-cam
+Pillow
+numpy
+requests
+google-generativeai
+elevenlabs
+<<<<<<< HEAD
+opencv-python-headless
+=======
+opencv-python-headless
+kagglehub
+>>>>>>> origin/sanchu/feature/cnn-gradcam
