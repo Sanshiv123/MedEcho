@@ -23,3 +23,12 @@ build/
 *.log
 
 .env
+
+venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+static/audio/
+static/scans/
+static/heatmaps/
