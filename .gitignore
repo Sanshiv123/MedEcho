@@ -21,3 +21,5 @@ build/
 
 # Misc
 *.log
+
+.env
