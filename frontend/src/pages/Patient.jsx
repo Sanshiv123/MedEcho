@@ -85,7 +85,7 @@ export default function Patient() {
 
   const phase1Message = data.phase1_script || "Your scan has come through clearly. Your care team is reviewing it now. You are in good hands.";
   const currentScript = phase === 1 ? phase1Message : phase2Script;
-  const audioUrl = phase === 2 ? data.audio_url : null;
+  const videoUrl = phase === 1 ? data.phase1_video_url : data.phase2_video_url;
   const firstTrial = data.trials && data.trials.length > 0 ? data.trials[0] : null;
 
   return (
@@ -131,7 +131,7 @@ export default function Patient() {
 
         {/* Avatar + transcript */}
         <div className="fade-in-up stagger-4 glass rounded-2xl p-5 flex flex-col gap-4">
-          <AvatarPlayer phase={phase} language={data.language} audioUrl={audioUrl} />
+          <AvatarPlayer phase={phase} language={data.language} script={currentScript} />
           <TranscriptPanel phase={phase} script={currentScript} />
         </div>
 

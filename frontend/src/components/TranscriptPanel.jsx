@@ -3,20 +3,14 @@ import React from "react";
 export default function TranscriptPanel({ phase, script }) {
   return (
     <div
-      className="transcript-panel"
       style={{
-        marginTop: "16px",
         padding: "16px",
-        border: "1px solid #e5e7eb",
         borderRadius: "12px",
-        background: "#ffffff",
+        background: phase === 2 ? "rgba(16,185,129,0.05)" : "rgba(255,255,255,0.02)",
+        border: `1px solid ${phase === 2 ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.05)"}`,
       }}
     >
-      <h3 style={{ marginTop: 0 }}>
-        {phase === 1 ? "Initial update" : "Doctor-reviewed explanation"}
-      </h3>
-
-      <p style={{ marginBottom: 0 }}>
+      <p className="text-white/70 text-sm leading-relaxed">
         {script || "Transcript not available yet."}
       </p>
     </div>

@@ -1,6 +1,7 @@
 import os
 import json
 from flask import Blueprint, request, jsonify
+from services.heygen import generate_avatar_video_background
 
 approve_bp = Blueprint('approve', __name__)
 
@@ -35,5 +36,13 @@ def approve(patient_id):
 
     with open(data_path, 'w') as f:
         json.dump(data, f)
+
+    if phase2_script:
+        generate_avatar_video_background(
+            script=phase2_script,
+            language=data.get('language', 'en'),
+            patient_json_path=data_path,
+            url_key='phase2_video_url'
+        )
 
     return jsonify({"status": "sent", "patient_id": patient_id})
