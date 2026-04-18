@@ -16,7 +16,21 @@ def approve(patient_id):
         data = json.load(f)
 
     body = request.get_json()
-    data['physician_notes'] = body.get('physician_notes', '')
+    physician_notes = body.get('physician_notes', '')
+
+    try:
+        from services.gemini import generate_phase2_from_assessment
+        phase2_script = generate_phase2_from_assessment(
+            physician_notes=physician_notes,
+            condition=data.get('condition', ''),
+            language=data.get('language', 'en')
+        )
+    except Exception as e:
+        print(f"Gemini phase2 error: {e}")
+        phase2_script = physician_notes
+
+    data['physician_notes'] = physician_notes
+    data['phase2_script'] = phase2_script
     data['phase'] = 2
 
     with open(data_path, 'w') as f:

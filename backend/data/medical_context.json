@@ -1,0 +1,56 @@
+{
+  "pneumonia": {
+    "plain_description": "an infection that inflames the air sacs in one or both lungs, sometimes filling them with fluid",
+    "what_patient_feels": "chest pain when breathing or coughing, fever, chills, cough that may produce phlegm, fatigue, difficulty breathing",
+    "what_doctor_looks_for": "consolidation or opacity in lung fields, often in one lobe, indicating fluid or infection in the air sacs",
+    "urgency_context": {
+      "Critical": "requires prompt medical evaluation and likely antibiotic treatment — should be seen today",
+      "Moderate": "should be evaluated by a physician within 24 to 48 hours",
+      "Low": "can be monitored with a scheduled follow-up appointment in the coming days"
+    }
+  },
+
+  "pleural_effusion": {
+    "plain_description": "a buildup of excess fluid between the layers of tissue that line the lungs and chest cavity",
+    "what_patient_feels": "shortness of breath, chest pain especially when breathing deeply, dry cough, fever if infection is present",
+    "what_doctor_looks_for": "blunting of the costophrenic angle on X-ray, haziness at the lung base, fluid accumulation visible on one or both sides",
+    "urgency_context": {
+      "Critical": "large effusion may compress the lung and requires urgent drainage or hospital evaluation",
+      "Moderate": "needs physician evaluation soon to determine underlying cause such as heart failure or infection",
+      "Low": "small effusion can be monitored with imaging follow-up and outpatient workup"
+    }
+  },
+
+  "atelectasis": {
+    "plain_description": "a condition where part or all of a lung collapses or does not inflate properly",
+    "what_patient_feels": "shortness of breath, rapid shallow breathing, cough, low oxygen levels in some cases — mild cases may have no symptoms",
+    "what_doctor_looks_for": "increased density or opacity in part of the lung, shift of the trachea or heart toward the affected side, loss of lung volume on one side",
+    "urgency_context": {
+      "Critical": "large or complete lung collapse requires urgent intervention to restore breathing",
+      "Moderate": "partial collapse needs physician evaluation and may require breathing exercises or bronchoscopy",
+      "Low": "minor atelectasis is common after procedures and often resolves with deep breathing exercises and monitoring"
+    }
+  },
+
+  "cardiomegaly": {
+    "plain_description": "an enlarged heart, which is not a disease itself but a sign of an underlying condition such as high blood pressure or heart disease",
+    "what_patient_feels": "shortness of breath especially when lying down, swelling in the legs or ankles, fatigue, irregular heartbeat, dizziness",
+    "what_doctor_looks_for": "cardiac silhouette wider than half the chest width on X-ray, indicating the heart is larger than normal",
+    "urgency_context": {
+      "Critical": "severe enlargement with symptoms of heart failure requires urgent cardiology evaluation",
+      "Moderate": "should be evaluated by a physician with an echocardiogram to determine the underlying cause",
+      "Low": "mild enlargement without acute symptoms can be followed up with a scheduled cardiology appointment"
+    }
+  },
+
+  "no_finding": {
+    "plain_description": "no significant abnormality detected in the chest X-ray at this time",
+    "what_patient_feels": "this result does not indicate any specific symptoms — the scan appears within normal limits",
+    "what_doctor_looks_for": "clear lung fields, normal heart size, no consolidation, no effusion, no masses detected",
+    "urgency_context": {
+      "Critical": "no critical findings — result appears normal",
+      "Moderate": "no significant findings — routine follow-up as directed by your physician",
+      "Low": "no abnormalities detected — no immediate action required"
+    }
+  }
+}

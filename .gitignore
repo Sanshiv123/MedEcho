@@ -1,7 +1,29 @@
-venv/
+# Environment
+.env
+
+# Python
 __pycache__/
 *.pyc
-data/
-static/heatmaps/
-.env
+*.pyo
+venv/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Mac
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+*.log
 *.pt
+data/
+static/audio/
+static/scans/
+static/heatmaps/

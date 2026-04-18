@@ -6,7 +6,6 @@ from routes.approve import approve_bp
 from routes.status import status_bp
 from routes.patient import patient_bp
 
-
 app = Flask(__name__)
 CORS(app, origins="*", allow_headers=["Content-Type"], methods=["GET", "POST", "OPTIONS"])
 
@@ -15,6 +14,7 @@ app.register_blueprint(explain_bp)
 app.register_blueprint(approve_bp)
 app.register_blueprint(status_bp)
 app.register_blueprint(patient_bp)
+
 from flask import send_from_directory
 import os
 
