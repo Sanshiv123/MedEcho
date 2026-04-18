@@ -1,10 +1,20 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+
+const Card = ({ children, className = "" }) => (
+  <div className={`glass rounded-2xl p-5 flex flex-col gap-4 ${className}`}>{children}</div>
+);
+
+const SectionLabel = ({ children }) => (
+  <p style={{fontFamily: 'Syne, sans-serif'}} className="text-xs font-semibold text-white/30 uppercase tracking-widest">{children}</p>
+);
 
 export default function Physician() {
   const { patientId } = useParams();
+  const navigate = useNavigate();
+  const [manualId, setManualId] = useState("");
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!patientId);
   const [error, setError] = useState(null);
   const [physicianNotes, setPhysicianNotes] = useState("");
   const [sending, setSending] = useState(false);
@@ -12,17 +22,16 @@ export default function Physician() {
   const [showHeatmap, setShowHeatmap] = useState(false);
 
   useEffect(() => {
+    if (!patientId) return;
     fetch(`/api/patient/${patientId}`)
       .then((r) => r.json())
       .then((d) => {
+        if (d.error) { setError(d.error); setLoading(false); return; }
         setData(d);
         setPhysicianNotes(d.physician_notes || "");
         setLoading(false);
       })
-      .catch(() => {
-        setError("Failed to load patient data.");
-        setLoading(false);
-      });
+      .catch(() => { setError("Failed to load patient data."); setLoading(false); });
   }, [patientId]);
 
   const handleSend = async () => {
@@ -36,153 +45,196 @@ export default function Physician() {
     setSent(true);
   };
 
+  const urgencyConfig = {
+    Critical: { color: "#EF4444", bg: "rgba(239,68,68,0.1)", border: "rgba(239,68,68,0.2)" },
+    Moderate: { color: "#F59E0B", bg: "rgba(245,158,11,0.1)", border: "rgba(245,158,11,0.2)" },
+    Low: { color: "#10B981", bg: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.2)" },
+  };
+
+  if (!patientId) return (
+    <div className="min-h-screen grid-bg flex flex-col items-center justify-center p-8 gap-8">
+      <div className="fade-in-up stagger-1 text-center">
+        <h1 style={{fontFamily: 'Syne, sans-serif'}} className="text-3xl font-bold text-white">MedEcho</h1>
+        <p className="text-white/30 text-sm mt-1">Physician Portal</p>
+      </div>
+      <div className="fade-in-up stagger-2 w-full max-w-md glass rounded-3xl p-8 flex flex-col gap-4">
+        <SectionLabel>Patient ID</SectionLabel>
+        <input
+          type="text"
+          value={manualId}
+          onChange={(e) => setManualId(e.target.value)}
+          placeholder="P-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+          className="w-full glass rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none"
+          style={{border: '1px solid rgba(255,255,255,0.07)', fontFamily: 'DM Mono, monospace'}}
+        />
+        <button
+          onClick={() => { if (manualId.trim()) navigate(`/physician/${manualId.trim()}`); }}
+          className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 accent-glow"
+          style={{background: 'linear-gradient(135deg, #10B981, #059669)', fontFamily: 'Syne, sans-serif'}}
+        >
+          Load Patient →
+        </button>
+      </div>
+    </div>
+  );
+
   if (loading) return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white flex items-center justify-center">
-      <p className="text-gray-500 text-sm">Loading patient data...</p>
+    <div className="min-h-screen grid-bg flex items-center justify-center">
+      <p className="text-white/30 text-sm">Loading patient data...</p>
     </div>
   );
 
   if (error) return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white flex items-center justify-center">
-      <p className="text-red-400 text-sm">{error}</p>
+    <div className="min-h-screen grid-bg flex items-center justify-center">
+      <p className="text-red-400/70 text-sm">{error}</p>
     </div>
   );
 
-  const urgencyColor = {
-    Critical: "text-red-400 bg-red-400/10 border-red-400/20",
-    Moderate: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
-    Low: "text-green-400 bg-green-400/10 border-green-400/20",
-  }[data.urgency] || "text-gray-400";
+  const urg = urgencyConfig[data.urgency] || urgencyConfig.Low;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white p-8">
+    <div className="min-h-screen grid-bg text-white p-8">
       <div className="max-w-6xl mx-auto flex flex-col gap-6">
 
         {/* Header */}
-        <div className="flex items-start justify-between">
+        <div className="fade-in-up stagger-1 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">MedEcho</h1>
-            <p className="text-gray-500 text-sm mt-1">Physician Portal</p>
+            <h1 style={{fontFamily: 'Syne, sans-serif'}} className="text-2xl font-bold text-white">MedEcho</h1>
+            <p className="text-white/30 text-sm mt-0.5">Physician Portal</p>
           </div>
           <div className="text-right">
-            <p className="text-white font-semibold text-lg">{data.patient_name}</p>
-            <p className="text-gray-600 text-xs font-mono mt-1">{data.patient_id}</p>
+            <p style={{fontFamily: 'Syne, sans-serif'}} className="text-white font-semibold text-lg">{data.patient_name}</p>
+            <p className="text-white/25 text-xs mt-0.5" style={{fontFamily: 'DM Mono, monospace'}}>{data.patient_id}</p>
           </div>
         </div>
 
-        {/* Main grid */}
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-5">
 
-          {/* Left — scans */}
+          {/* Left column */}
           <div className="flex flex-col gap-4">
 
-            {/* Scan toggle */}
-            <div className="bg-[#12121a] border border-[#1e1e2e] rounded-2xl p-4 flex flex-col gap-3">
+            {/* Scan */}
+            <div className="fade-in-up stagger-2 glass rounded-2xl p-4 flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-gray-300">
-                  {showHeatmap ? "GradCAM Heatmap" : "Original Scan"}
-                </p>
+                <SectionLabel>{showHeatmap ? "GradCAM Heatmap" : "Original Scan"}</SectionLabel>
                 <button
                   onClick={() => setShowHeatmap(!showHeatmap)}
-                  className="text-xs text-[#3b82f6] hover:underline"
+                  className="text-xs transition-colors"
+                  style={{color: '#3D7EFF'}}
                 >
                   {showHeatmap ? "Show original" : "Show heatmap"}
                 </button>
               </div>
               <img
-                src={`${showHeatmap ? data.heatmap_url : data.image_url}`}
+                src={showHeatmap ? data.heatmap_url : data.image_url}
                 alt={showHeatmap ? "Heatmap" : "Scan"}
                 className="rounded-xl w-full object-contain max-h-72"
               />
             </div>
 
-            {/* AI findings */}
-            <div className="bg-[#12121a] border border-[#1e1e2e] rounded-2xl p-5 flex flex-col gap-4">
-              <p className="text-sm font-medium text-gray-300">AI Findings</p>
+            {/* AI Findings */}
+            <Card className="fade-in-up stagger-3">
+              <SectionLabel>AI Findings</SectionLabel>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-white font-semibold text-lg">{data.condition}</p>
-                  <p className="text-gray-500 text-xs mt-0.5">Primary condition</p>
+                  <p style={{fontFamily: 'Syne, sans-serif'}} className="text-white font-bold text-xl">{data.condition}</p>
+                  <p className="text-white/30 text-xs mt-0.5">Primary condition</p>
                 </div>
-                <span className={`text-xs font-medium px-3 py-1 rounded-full border ${urgencyColor}`}>
+                <span
+                  className="text-xs font-semibold px-3 py-1 rounded-full"
+                  style={{color: urg.color, background: urg.bg, border: `1px solid ${urg.border}`, fontFamily: 'Syne, sans-serif'}}
+                >
                   {data.urgency}
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
-                <div className="flex-1 bg-[#1e1e2e] rounded-full h-2">
+              <div className="flex items-center gap-3">
+                <div className="flex-1 rounded-full h-1.5" style={{background: 'rgba(255,255,255,0.06)'}}>
                   <div
-                    className="bg-[#3b82f6] h-2 rounded-full"
-                    style={{ width: `${Math.round(data.confidence * 100)}%` }}
+                    className="h-1.5 rounded-full transition-all"
+                    style={{width: `${Math.round(data.confidence * 100)}%`, background: 'linear-gradient(90deg, #3D7EFF, #60A5FA)'}}
                   />
                 </div>
-                <p className="text-gray-400 text-xs w-10 text-right">
-                  {Math.round(data.confidence * 100)}%
-                </p>
+                <p className="text-white/40 text-xs w-9 text-right">{Math.round(data.confidence * 100)}%</p>
               </div>
 
               <div>
-                <p className="text-gray-500 text-xs mb-2">Differential diagnosis</p>
+                <p className="text-white/25 text-xs mb-2">Differential</p>
                 <div className="flex flex-wrap gap-2">
                   {data.differential_diagnosis.map((d, i) => (
-                    <span key={i} className="text-xs bg-[#1e1e2e] text-gray-300 px-3 py-1 rounded-full">
+                    <span key={i} className="text-xs text-white/50 px-3 py-1 rounded-full" style={{background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)'}}>
                       {d}
                     </span>
                   ))}
                 </div>
               </div>
-            </div>
+            </Card>
+
+            {/* AI Clinical Report */}
+            {data.clinical_report && (
+              <Card className="fade-in-up stagger-4">
+                <SectionLabel>AI Clinical Report</SectionLabel>
+                <p className="text-white/60 text-sm leading-relaxed">{data.clinical_report}</p>
+              </Card>
+            )}
           </div>
 
-          {/* Right — notes + trials */}
+          {/* Right column */}
           <div className="flex flex-col gap-4">
 
-            {/* Clinician notes */}
-            <div className="bg-[#12121a] border border-[#1e1e2e] rounded-2xl p-5 flex flex-col gap-3">
-              <p className="text-sm font-medium text-gray-300">Clinician Notes</p>
-              <p className="text-gray-400 text-sm leading-relaxed">
-                {data.clinician_notes || <span className="text-gray-600 italic">No clinician notes provided.</span>}
+            {/* Clinician Notes */}
+            <Card className="fade-in-up stagger-2">
+              <SectionLabel>Clinician Notes</SectionLabel>
+              <p className="text-white/50 text-sm leading-relaxed">
+                {data.clinician_notes || <span className="text-white/20 italic">No notes provided.</span>}
               </p>
-            </div>
+            </Card>
 
-            {/* Physician assessment */}
-            <div className="bg-[#12121a] border border-[#1e1e2e] rounded-2xl p-5 flex flex-col gap-3">
-              <p className="text-sm font-medium text-gray-300">Your Assessment</p>
+            {/* Your Assessment */}
+            <Card className="fade-in-up stagger-3">
+              <SectionLabel>Your Assessment</SectionLabel>
               <textarea
                 value={physicianNotes}
                 onChange={(e) => setPhysicianNotes(e.target.value)}
                 placeholder="Add your clinical assessment..."
-                rows={4}
-                className="bg-[#0a0a0f] border border-[#1e1e2e] text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#3b82f6] resize-none placeholder-gray-600"
+                rows={5}
+                className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none resize-none transition-all"
+                style={{background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)'}}
               />
-            </div>
+            </Card>
 
-            {/* Matched trials */}
+            {/* Trials */}
             {data.trials && data.trials.length > 0 && (
-              <div className="bg-[#12121a] border border-[#1e1e2e] rounded-2xl p-5 flex flex-col gap-3">
-                <p className="text-sm font-medium text-gray-300">Matched Clinical Trials</p>
-                <div className="flex flex-col gap-3">
+              <Card className="fade-in-up stagger-4">
+                <SectionLabel>Matched Clinical Trials</SectionLabel>
+                <div className="flex flex-col gap-2">
                   {data.trials.map((trial, i) => (
-                    <div key={i} className="bg-[#0a0a0f] border border-[#1e1e2e] rounded-xl p-3 flex flex-col gap-1">
-                      <p className="text-white text-xs font-medium leading-snug">{trial.name}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-green-400 bg-green-400/10 border border-green-400/20 px-2 py-0.5 rounded-full">
+                    <div key={i} className="rounded-xl p-3 flex flex-col gap-1.5" style={{background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)'}}>
+                      <p className="text-white/70 text-xs font-medium leading-snug">{trial.name}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs px-2 py-0.5 rounded-full" style={{color: '#10B981', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)'}}>
                           {trial.status}
                         </span>
-                        <span className="text-gray-600 text-xs">{trial.location}</span>
+                        <span className="text-white/25 text-xs">{trial.location}</span>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
+              </Card>
             )}
 
-            {/* Send to patient */}
+            {/* Send button */}
             <button
               onClick={handleSend}
               disabled={sending || sent}
-              className="w-full bg-[#3b82f6] hover:bg-blue-500 disabled:opacity-50 transition text-white font-semibold py-3 rounded-xl"
+              className="fade-in-up stagger-5 w-full py-3.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40"
+              style={{
+                background: sent ? 'rgba(16,185,129,0.15)' : 'linear-gradient(135deg, #10B981, #059669)',
+                border: sent ? '1px solid rgba(16,185,129,0.3)' : 'none',
+                color: sent ? '#10B981' : 'white',
+                fontFamily: 'Syne, sans-serif'
+              }}
             >
               {sent ? "Sent to Patient ✓" : sending ? "Sending..." : "Send to Patient →"}
             </button>
