@@ -1,5 +1,4 @@
-// frontend/pages/Patient.jsx
-import React, { useEffect, useState } from "react";
+ import React, { useEffect, useState } from "react";
 import AvatarPlayer from "../components/AvatarPlayer";
 import TranscriptPanel from "../components/TranscriptPanel";
 import TrialCard from "../components/TrialCard";
@@ -22,58 +21,45 @@ export default function Patient() {
   const patientId = usePatientIdFromUrl();
 
   const [loading, setLoading] = useState(true);
-  const [phase, setPhase] = useState(1); // 1 or 2
+  const [phase, setPhase] = useState(1);
   const [patientData, setPatientData] = useState(null);
   const [error, setError] = useState(null);
 
-  // Polling interval id
-  const [pollId, setPollId] = useState(null);
+  async function fetchStatus() {
+    try {
+      const res = await fetch(`/api/status?patient_id=${patientId}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch patient status");
+      }
 
-  // Initial fetch + polling
+      const data = await res.json();
+      setPatientData(data);
+      setPhase(data.approved ? 2 : 1);
+      setLoading(false);
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError("Could not load your scan. Please try again in a few minutes.");
+      setLoading(false);
+    }
+  }
+
+  // Initial fetch
   useEffect(() => {
     if (!patientId) return;
-
-    async function fetchStatus() {
-      try {
-        const res = await fetch(`/api/status?patient_id=${patientId}`);
-        if (!res.ok) {
-          throw new Error("Failed to fetch patient status");
-        }
-        const data = await res.json();
-        setPatientData(data);
-        setLoading(false);
-
-        if (data.approved) {
-          setPhase(2);
-        } else {
-          setPhase(1);
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Could not load your scan. Please try again in a few minutes.");
-        setLoading(false);
-      }
-    }
-
-    // First fetch
     fetchStatus();
-
-    // Start polling every 5s
-    const interval = setInterval(fetchStatus, 5000);
-    setPollId(interval);
-
-    // Cleanup
-    return () => {
-      clearInterval(interval);
-    };
   }, [patientId]);
 
-  // Stop polling once approved
+  // Poll only during Phase 1
   useEffect(() => {
-    if (phase === 2 && pollId) {
-      clearInterval(pollId);
-    }
-  }, [phase, pollId]);
+    if (!patientId || phase !== 1) return;
+
+    const interval = setInterval(() => {
+      fetchStatus();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [patientId, phase]);
 
   if (!patientId) {
     return (
@@ -102,7 +88,7 @@ export default function Patient() {
     );
   }
 
-  const { scan, ai_report, explanations, trials, language } = patientData || {};
+  const { scan, explanations, trials, language } = patientData || {};
 
   const currentScript =
     phase === 1
@@ -112,7 +98,7 @@ export default function Patient() {
   const audioUrl =
     phase === 1
       ? null
-      : explanations?.audio_url; // Phase 2 audio
+      : explanations?.audio_url;
 
   const firstTrial = trials && trials.length > 0 ? trials[0] : null;
 
