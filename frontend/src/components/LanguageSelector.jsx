@@ -1,16 +1,9 @@
 import React from "react";
 
-export default function LanguageSelector({
-  currentLanguage = "en",
-  onChange = null,
-  disabled = true,
-}) {
+export default function LanguageSelector({ currentLanguage = "en", onChange = null, disabled = true }) {
   return (
     <div className="language-selector">
-      <label htmlFor="language-select" style={{ marginRight: "8px" }}>
-        Language:
-      </label>
-
+      <label htmlFor="language-select" style={{ marginRight: "8px" }}>Language:</label>
       <select
         id="language-select"
         value={currentLanguage}

@@ -3,7 +3,7 @@ from backend.config import HEYGEN_API_KEY
 
 HEYGEN_BASE = "https://api.heygen.com"
 
-def create_avatar_video(script, language, avatar_id="your_avatar_id"):
+def create_avatar_video(script, language, avatar_id="Abigail_sitting_sofa_front"):
     """
     Creates a HeyGen video with the avatar speaking the script.
     Returns a video URL when ready.
@@ -48,9 +48,9 @@ def get_avatar_video_url(video_id):
 def get_heygen_voice(language):
     # HeyGen voice IDs per language — get from their dashboard
     voice_map = {
-        "en": "en-US-JennyNeural",
-        "es": "es-ES-ElviraNeural",
-        "fr": "fr-FR-DeniseNeural",
-        "hi": "hi-IN-SwaraNeural"
+    "en": "f38a635bee7a4d1f9b0a654a31d050d2",
+    "es": "f38a635bee7a4d1f9b0a654a31d050d2",
+    "fr": "f38a635bee7a4d1f9b0a654a31d050d2",
+    "hi": "f38a635bee7a4d1f9b0a654a31d050d2",
     }
     return voice_map.get(language, voice_map["en"])

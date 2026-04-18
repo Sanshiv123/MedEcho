@@ -1,4 +1,4 @@
- import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AvatarPlayer from "../components/AvatarPlayer";
 import TranscriptPanel from "../components/TranscriptPanel";
 import TrialCard from "../components/TrialCard";

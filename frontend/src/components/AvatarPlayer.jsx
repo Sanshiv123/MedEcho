@@ -1,68 +1,30 @@
-import React, { useState } from "react";
+// frontend/components/AvatarPlayer.jsx
+import React from "react";
 
-export default function AvatarPlayer({
-  phase,
-  language,
-  audioUrl,
-  videoUrl = null,
-}) {
-  const [videoLoading, setVideoLoading] = useState(Boolean(videoUrl));
+export default function AvatarPlayer({ phase, language, audioUrl }) {
+  const phaseLabel = phase === 1 ? "Phase 1" : "Phase 2";
 
   return (
     <div className="avatar-player">
-      <div style={{ marginBottom: "12px" }}>
-        <strong>
-          {phase === 1 ? "Phase 1" : "Phase 2"} explanation
-        </strong>
-        <div style={{ color: "#666", fontSize: "14px" }}>
-          Language: {language || "en"}
-        </div>
+      <div className="avatar-visual">
+        {/* Replace with real avatar image if you have one */}
+        <div className="avatar-circle" />
       </div>
 
-      {videoUrl ? (
-        <div>
-          {videoLoading && (
-            <div style={{ marginBottom: "8px" }}>
-              Avatar is loading...
-            </div>
-          )}
+      <p className="avatar-status">
+        {phaseLabel} explanation in your language.
+      </p>
 
-          <video
-            controls
-            autoPlay
-            style={{ width: "100%", maxWidth: "420px", borderRadius: "12px" }}
-            onCanPlay={() => setVideoLoading(false)}
-          >
-            <source src={videoUrl} type="video/mp4" />
-            Your browser does not support video playback.
-          </video>
-        </div>
-      ) : (
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "420px",
-            minHeight: "180px",
-            borderRadius: "12px",
-            background: "#f3f4f6",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#666",
-            marginBottom: "12px",
-          }}
-        >
-          Avatar preview not available yet
-        </div>
-      )}
-
-      {phase === 2 && audioUrl && (
-        <div style={{ marginTop: "12px" }}>
-          <audio controls style={{ width: "100%", maxWidth: "420px" }}>
-            <source src={audioUrl} type="audio/mpeg" />
+      {audioUrl ? (
+        <div className="avatar-audio">
+          <audio controls src={audioUrl}>
             Your browser does not support audio playback.
           </audio>
         </div>
+      ) : (
+        <p className="avatar-waiting">
+          Preparing your detailed audio explanation…
+        </p>
       )}
     </div>
   );
