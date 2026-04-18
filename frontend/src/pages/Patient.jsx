@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import AvatarPlayer from "../components/AvatarPlayer";
+import TranscriptPanel from "../components/TranscriptPanel";
+import TrialCard from "../components/TrialCard";
+import LanguageSelector from "../components/LanguageSelector";
 
 export default function Patient() {
   const { patientId } = useParams();
@@ -52,7 +56,7 @@ export default function Patient() {
           type="text"
           value={manualId}
           onChange={(e) => setManualId(e.target.value)}
-          placeholder="P-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+          placeholder="P001"
           className="w-full glass rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none"
           style={{border: '1px solid rgba(255,255,255,0.07)', fontFamily: 'DM Mono, monospace'}}
         />
@@ -79,7 +83,10 @@ export default function Patient() {
     </div>
   );
 
-  const phase1Message = data.phase1_script || "Your scan has come through clearly. Your care team is reviewing it now and will be in touch with you soon. You're in good hands.";
+  const phase1Message = data.phase1_script || "Your scan has come through clearly. Your care team is reviewing it now. You are in good hands.";
+  const currentScript = phase === 1 ? phase1Message : phase2Script;
+  const videoUrl = phase === 1 ? data.phase1_video_url : data.phase2_video_url;
+  const firstTrial = data.trials && data.trials.length > 0 ? data.trials[0] : null;
 
   return (
     <div className="min-h-screen grid-bg flex flex-col items-center justify-center p-8 gap-6">
@@ -93,14 +100,11 @@ export default function Patient() {
 
         {/* Status */}
         <div className="fade-in-up stagger-2 glass rounded-2xl p-4 flex items-center gap-4">
-          <div
-            className="w-2.5 h-2.5 rounded-full shrink-0"
-            style={{
-              background: phase === 2 ? '#10B981' : '#F59E0B',
-              boxShadow: phase === 2 ? '0 0 8px rgba(16,185,129,0.5)' : '0 0 8px rgba(245,158,11,0.5)',
-              animation: phase === 1 ? 'pulseDot 2s ease-in-out infinite' : 'none'
-            }}
-          />
+          <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{
+            background: phase === 2 ? '#10B981' : '#F59E0B',
+            boxShadow: phase === 2 ? '0 0 8px rgba(16,185,129,0.5)' : '0 0 8px rgba(245,158,11,0.5)',
+            animation: phase === 1 ? 'pulseDot 2s ease-in-out infinite' : 'none'
+          }} />
           <div>
             <p style={{fontFamily: 'Syne, sans-serif'}} className="text-white font-semibold text-sm">
               {phase === 2 ? "Your doctor has reviewed your scan" : "Your care team is reviewing your scan"}
@@ -111,55 +115,37 @@ export default function Patient() {
           </div>
         </div>
 
+        {/* Language selector */}
+        <div className="fade-in-up stagger-2 glass rounded-2xl p-4">
+          <LanguageSelector currentLanguage={data.language} />
+        </div>
+
         {/* Scan */}
         <div className="fade-in-up stagger-3 glass rounded-2xl p-4 flex flex-col gap-3">
           <p style={{fontFamily: 'Syne, sans-serif'}} className="text-xs font-semibold text-white/30 uppercase tracking-widest">Your scan</p>
-          <img
-            src={data.image_url}
-            alt="Your scan"
-            className="rounded-xl w-full object-contain max-h-64"
-          />
+          {data.image_url
+            ? <img src={data.image_url} alt="Your scan" className="rounded-xl w-full object-contain max-h-64" />
+            : <p className="text-white/30 text-sm">Scan image not available.</p>
+          }
         </div>
 
-        {/* Avatar + Message */}
+        {/* Avatar + transcript */}
         <div className="fade-in-up stagger-4 glass rounded-2xl p-5 flex flex-col gap-4">
-
-          {/* Avatar placeholder */}
-          <div
-            className="w-full h-36 rounded-xl flex items-center justify-center flex-col gap-2"
-            style={{background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.07)'}}
-          >
-            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{background: 'rgba(61,126,255,0.1)'}}>
-              <svg width="20" height="20" fill="none" stroke="#3D7EFF" strokeWidth="1.5" viewBox="0 0 24 24">
-                <path d="M17 8C17 10.7614 14.7614 13 12 13C9.23858 13 7 10.7614 7 8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8Z"/>
-                <path d="M3 21C3 17.134 7.02944 14 12 14C16.9706 14 21 17.134 21 21"/>
-              </svg>
-            </div>
-            <p className="text-white/20 text-xs">Avatar will appear here</p>
-          </div>
-
-          {/* Message */}
-          <div
-            className="rounded-xl p-4"
-            style={{background: phase === 2 ? 'rgba(16,185,129,0.05)' : 'rgba(255,255,255,0.02)', border: `1px solid ${phase === 2 ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.05)'}`}}
-          >
-            <p className="text-white/70 text-sm leading-relaxed">
-              {phase === 2 ? phase2Script : phase1Message}
-            </p>
-          </div>
+          <AvatarPlayer phase={phase} language={data.language} script={currentScript} />
+          <TranscriptPanel phase={phase} script={currentScript} />
         </div>
 
-        {/* Trials soft card - phase 2 only */}
-        {phase === 2 && data.trials && data.trials.length > 0 && (
-          <div className="fade-in-up stagger-5 glass rounded-2xl p-5 flex flex-col gap-2">
-            <p style={{fontFamily: 'Syne, sans-serif'}} className="text-white/70 text-sm font-semibold">You may be eligible for a nearby study</p>
-            <p className="text-white/30 text-xs">Your care team will follow up with more information.</p>
+        {/* Trial card - phase 2 only */}
+        {phase === 2 && firstTrial && (
+          <div className="fade-in-up stagger-5">
+            <TrialCard trial={firstTrial} />
           </div>
         )}
 
         <p className="fade-in text-center text-white/15 text-xs">
           Prepared for {data.patient_name} · <span style={{fontFamily: 'DM Mono, monospace'}}>{data.patient_id}</span>
         </p>
+
       </div>
     </div>
   );

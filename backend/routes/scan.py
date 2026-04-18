@@ -33,7 +33,7 @@ def scan():
     result = classify_scan(image_path, return_tensors=True)
     img_tensor = result.pop("_img_tensor")
     img_np = result.pop("_img_np")
-    heatmap_path = generate_heatmap(img_tensor, img_np, xrv_model)
+    heatmap_path = generate_heatmap(img_tensor, img_np, xrv_model, image_path)
     heatmap_filename = os.path.basename(heatmap_path)
 
     trials = get_matched_trials(result["condition"], patient_location)
@@ -78,3 +78,4 @@ def scan():
         json.dump(result, f)
 
     return jsonify(result)
+    

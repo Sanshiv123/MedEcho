@@ -27,3 +27,7 @@ data/
 static/audio/
 static/scans/
 static/heatmaps/
+
+echo '.env' >> .gitignore
+echo 'venv/' >> .gitignore
+cat .gitignore   # confirm both lines are there
