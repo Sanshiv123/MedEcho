@@ -4,4 +4,4 @@ python-dotenv
 google-generativeai
 elevenlabs
 requests
-Pillow
+Pillow 

@@ -1,0 +1,16 @@
+# Environment
+.env
+# Python
+__pycache__/
+*.pyc
+# Node
+frontend/node_modules/
+frontend/build/
+# Mac
+.DS_Store
+# IDE
+.vscode/
+.idea/
+# Data
+backend/data/
+backend/triage_env/
