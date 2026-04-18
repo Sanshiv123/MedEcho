@@ -20,4 +20,7 @@ build/
 .idea/
 
 # Misc
-*.log
+*.logtriage_env/
+venv/
+__pycache__/
+*.pyc
