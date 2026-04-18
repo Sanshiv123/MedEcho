@@ -11,3 +11,4 @@ requests
 google-generativeai
 elevenlabs
 opencv-python-headless
+kagglehub
