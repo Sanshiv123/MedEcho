@@ -10,6 +10,7 @@ export default function App() {
         <Route path="/clinician" element={<Clinician />} />
         <Route path="/physician" element={<Physician />} />
         <Route path="/patient" element={<Patient />} />
+        <Route path="/physician/:patientId" element={<Physician />} />
       </Routes>
     </BrowserRouter>
   )

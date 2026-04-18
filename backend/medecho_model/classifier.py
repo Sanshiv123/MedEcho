@@ -23,28 +23,32 @@ def get_urgency(confidence):
     else:
         return "Low"
 
-def classify_scan(image_path):
+def classify_scan(image_path, return_tensors=False):
     img_tensor = preprocess_image(image_path)
-    
+
     with torch.no_grad():
         outputs = xrv_model(img_tensor)
-    
+
     predictions = dict(zip(xrv_model.pathologies, outputs[0].numpy()))
     top_condition = max(predictions, key=predictions.get)
     confidence = float(predictions[top_condition])
     urgency = get_urgency(confidence)
-    
-    sorted_preds = sorted(
-        predictions.items(), 
-        key=lambda x: x[1], 
-        reverse=True
-    )
+
+    sorted_preds = sorted(predictions.items(), key=lambda x: x[1], reverse=True)
     differential = [p[0] for p in sorted_preds[:3]]
-    
-    return {
+
+    result = {
         "condition": top_condition,
         "confidence": round(confidence, 2),
         "urgency": urgency,
         "urgency_reason": f"Finding detected → {top_condition}",
         "differential_diagnosis": differential
     }
+
+    if return_tensors:
+        img_np = np.stack([img_tensor[0, 0].numpy()] * 3, axis=-1)
+        img_np = (img_np - img_np.min()) / (img_np.max() - img_np.min() + 1e-8)
+        result["_img_tensor"] = img_tensor
+        result["_img_np"] = img_np
+
+    return result
