@@ -1,26 +1,7 @@
-# Environment
+venv/
+__pycache__/
+*.pyc
+data/
+static/heatmaps/
 .env
-
-# Python
-__pycache__/
-*.pyc
-venv/
-*.egg-info/
-
-# Node
-node_modules/
-dist/
-build/
-
-# Mac
-.DS_Store
-
-# IDE
-.vscode/
-.idea/
-
-# Misc
-*.logtriage_env/
-venv/
-__pycache__/
-*.pyc
+*.pt
