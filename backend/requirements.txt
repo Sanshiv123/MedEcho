@@ -10,3 +10,4 @@ numpy
 requests
 google-generativeai
 elevenlabs
+opencv-python-headless
