@@ -23,7 +23,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AvatarPlayer from "../components/AvatarPlayer";
 import TrialCard from "../components/TrialCard";
-
+import MedEchoLogo from "../components/MedEchoLogo";
 // ---------------------------------------------------------------------------
 // Theme helper
 // ---------------------------------------------------------------------------
@@ -225,15 +225,11 @@ export default function Patient() {
       {/* Sticky navbar */}
       <div style={{ position: 'sticky', top: 0, zIndex: 100, padding: '12px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: dark ? 'rgba(6,14,26,0.85)' : 'rgba(255,255,255,0.8)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(99,102,241,0.1)'}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg,#F59E0B,#D97706)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="15" height="15" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-            </svg>
-          </div>
-          <div>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 14, fontWeight: 700, color: dark ? '#E2EAF8' : '#0A1628', lineHeight: 1 }}>Patient Portal</p>
-            <p style={{ fontSize: 10, color: dark ? '#4A6A8A' : '#9CA3AF', marginTop: 2 }}>MedEcho · Secure</p>
-          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+  <MedEchoLogo width={110} height={40} />
+  <div style={{ width: 1, height: 24, background: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }} />
+  <p style={{ fontSize: 12, color: dark ? '#4A6A8A' : '#9CA3AF' }}>Patient Portal</p>
+</div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
