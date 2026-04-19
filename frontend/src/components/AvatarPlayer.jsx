@@ -1,3 +1,17 @@
+// frontend/src/components/AvatarPlayer.jsx
+// Renders the LiveAvatar embed for the patient portal.
+//
+// On mount (and whenever the phase or script changes), fetches a fresh
+// LiveAvatar embed URL from /api/avatar and loads it in an iframe.
+// A new session is created for each phase transition so the avatar
+// delivers the correct greeting for the current phase.
+//
+// Props:
+//   phase     - Current phase (1 = pre-physician review, 2 = post-review)
+//   language  - Patient's language code ("en", "es", "fr", "hi")
+//   script    - Gemini-generated script for the current phase (used as greeting)
+//   patientId - Patient UUID for loading full context from the backend
+
 import React, { useState, useEffect } from "react";
 
 export default function AvatarPlayer({ phase, language, script, patientId }) {
@@ -5,12 +19,18 @@ export default function AvatarPlayer({ phase, language, script, patientId }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Reset state on phase or script change
     setLoading(true);
     setEmbedUrl(null);
+
+    // Build query params for the avatar endpoint
+    // sandbox=false uses the production female avatar (consumes LiveAvatar credits)
+    // sandbox=true  uses the Wayne avatar (no credits, limited behavior)
     const params = new URLSearchParams({ sandbox: 'false' });
-    if (script) params.append('script', script);
-    if (patientId) params.append('patient_id', patientId);
-    
+    if (script) params.append('script', script);         // Greeting text for the avatar
+    if (patientId) params.append('patient_id', patientId); // For loading patient knowledge
+
+    // Request a fresh embed session from the backend
     fetch(`/api/avatar?${params.toString()}`)
       .then(r => r.json())
       .then(d => {
@@ -18,8 +38,10 @@ export default function AvatarPlayer({ phase, language, script, patientId }) {
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, [phase, script]);
 
+  }, [phase, script]); // Re-fetch when phase transitions or script changes
+
+  // Loading state — shown while the embed session is being created
   if (loading) return (
     <div
       className="w-full rounded-xl flex items-center justify-center"
@@ -29,6 +51,7 @@ export default function AvatarPlayer({ phase, language, script, patientId }) {
     </div>
   );
 
+  // Error state — shown if the embed URL could not be created
   if (!embedUrl) return (
     <div
       className="w-full rounded-xl flex items-center justify-center flex-col gap-2"
@@ -44,6 +67,7 @@ export default function AvatarPlayer({ phase, language, script, patientId }) {
     </div>
   );
 
+  // Embed state — LiveAvatar iframe with microphone and autoplay permissions
   return (
     <iframe
       src={embedUrl}
