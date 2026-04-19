@@ -55,7 +55,13 @@ def scan():
     heatmap_path = generate_heatmap(img_tensor, img_np, xrv_model, image_path)
     heatmap_filename = os.path.basename(heatmap_path)
 
-    trials = get_matched_trials(result["condition"], patient_location)
+    trials = get_matched_trials(
+    condition=result["condition"],
+    location=patient_location,
+    differential=result.get("differential_diagnosis", []),
+    symptoms=request.form.get('symptoms', ''),
+    language=language
+    )
 
     result['patient_id'] = patient_id
     result['patient_name'] = patient_name

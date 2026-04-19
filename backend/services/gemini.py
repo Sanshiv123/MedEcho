@@ -26,6 +26,14 @@ def generate_dual_output(condition, confidence, urgency, language, patient_id, g
         "General": "Use warm, clear, plain language suitable for any adult."
     }.get(generation, "Use warm, clear, plain language suitable for any adult.")
 
+    confidence_instruction = (
+    "The confidence level is low (below 60%). Use cautious, tentative language — say things like 'we noticed something that may need a closer look' rather than making definitive statements."
+    if confidence < 0.60 else
+    "The confidence level is high (above 85%). You can be more direct and clear about what was found without being alarming."
+    if confidence > 0.85 else
+    "The confidence level is moderate. Be clear but measured — acknowledge that the care team will confirm the findings."
+)
+
     prompt = f"""
 You are a medical AI assistant helping a healthcare team communicate with a patient.
 A chest X-ray scan has been analyzed and shows the following:
@@ -35,6 +43,7 @@ A chest X-ray scan has been analyzed and shows the following:
 - Urgency level: {urgency}
 - Medical reference context: {json.dumps(condition_context)}
 CRITICAL: You MUST follow this communication style exactly: {generation_instruction}
+- Confidence guidance: {confidence_instruction}
 
 Your job is to generate exactly THREE outputs and return them as a single JSON object.
 

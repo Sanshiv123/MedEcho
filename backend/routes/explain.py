@@ -21,6 +21,8 @@ def explain():
     if data["language"] not in ["en", "es", "fr", "hi"]:
         return jsonify({"error": "language must be en, es, fr, or hi"}), 400
 
+    generation = data.get("generation", "General")
+
     result = generate_dual_output(
         condition=data["condition"],
         confidence=data["confidence"],
