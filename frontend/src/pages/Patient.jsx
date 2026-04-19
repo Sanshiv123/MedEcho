@@ -37,6 +37,7 @@ export default function Patient() {
           if (d.phase === 2) {
             setPhase(2);
             setPhase2Script(d.phase2_script);
+            setData(d);
             clearInterval(interval);
           }
         });
@@ -85,7 +86,6 @@ export default function Patient() {
 
   const phase1Message = data.phase1_script || "Your scan has come through clearly. Your care team is reviewing it now. You are in good hands.";
   const currentScript = phase === 1 ? phase1Message : phase2Script;
-  const videoUrl = phase === 1 ? data.phase1_video_url : data.phase2_video_url;
   const firstTrial = data.trials && data.trials.length > 0 ? data.trials[0] : null;
 
   return (
@@ -132,8 +132,25 @@ export default function Patient() {
         {/* Avatar + transcript */}
         <div className="fade-in-up stagger-4 glass rounded-2xl p-5 flex flex-col gap-4">
           <AvatarPlayer phase={phase} language={data.language} script={currentScript} patientId={patientId} />
-          <TranscriptPanel phase={phase} script={currentScript} />
-        </div>
+          {phase === 1 && <TranscriptPanel phase={phase} script={currentScript} />}        </div>
+
+        {/* Phase 2 — doctor assessment + plain language explanation */}
+        {phase === 2 && (
+          <>
+            {data.physician_notes && (
+              <div className="fade-in-up glass rounded-2xl p-5 flex flex-col gap-3">
+                <p style={{fontFamily: 'Syne, sans-serif'}} className="text-xs font-semibold text-white/30 uppercase tracking-widest">Your doctor's assessment</p>
+                <p className="text-white/60 text-sm leading-relaxed">{data.physician_notes}</p>
+              </div>
+            )}
+            {data.phase2_script && (
+              <div className="fade-in-up glass rounded-2xl p-5 flex flex-col gap-3">
+                <p style={{fontFamily: 'Syne, sans-serif'}} className="text-xs font-semibold text-white/30 uppercase tracking-widest">What this means for you</p>
+                <p className="text-white/70 text-sm leading-relaxed">{data.phase2_script}</p>
+              </div>
+            )}
+          </>
+        )}
 
         {/* Trial card - phase 2 only */}
         {phase === 2 && firstTrial && (

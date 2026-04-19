@@ -5,15 +5,16 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import LIVEAVATAR_API_KEY, LIVEAVATAR_CONTEXT_ID
 
 LIVEAVATAR_BASE = "https://api.liveavatar.com"
+PRODUCTION_AVATAR_ID = "07faa1c4-b7e1-4d26-a38a-337364dee160"
 SANDBOX_AVATAR_ID = "dd73ea75-1218-4ef3-92ce-606d5f7fbc0a"
-
 def create_embed(is_sandbox=False, greeting=None, knowledge=None):
     headers = {
         "X-API-KEY": LIVEAVATAR_API_KEY,
         "Content-Type": "application/json"
     }
+    avatar_id = SANDBOX_AVATAR_ID if is_sandbox else PRODUCTION_AVATAR_ID
     payload = {
-        "avatar_id": SANDBOX_AVATAR_ID,
+        "avatar_id": avatar_id,
         "context_id": LIVEAVATAR_CONTEXT_ID,
         "is_sandbox": is_sandbox
     }
