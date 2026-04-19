@@ -51,27 +51,25 @@ export default function App() {
       <button
         data-print-hide
         onClick={() => setDark(!dark)}
+        title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
         style={{
-          position: 'fixed', top: 16, right: 16, zIndex: 9999,
-          width: 44, height: 24, borderRadius: 12,
-          background: dark ? 'rgba(255,255,255,0.1)' : '#3D7EFF',
-          border: '1px solid rgba(255,255,255,0.15)',
-          cursor: 'pointer', transition: 'background 0.2s',
-          display: 'flex', alignItems: 'center',
-          padding: '0 4px'
+          position: 'fixed', top: 14, right: 16, zIndex: 9999,
+          width: 32, height: 32, borderRadius: 8,
+          background: 'transparent', border: 'none',
+          cursor: 'pointer', fontSize: 18,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          opacity: 0.5, transition: 'opacity 0.15s ease, transform 0.15s ease',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.opacity = '1'
+          e.currentTarget.style.transform = 'scale(1.15)'
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.opacity = '0.5'
+          e.currentTarget.style.transform = 'scale(1)'
         }}
       >
-        {/* Sliding pill indicator */}
-        <div style={{
-          width: 16, height: 16, borderRadius: '50%',
-          background: 'white',
-          transform: dark ? 'translateX(0)' : 'translateX(20px)',
-          transition: 'transform 0.2s',
-          display: 'flex', alignItems: 'center',
-          justifyContent: 'center', fontSize: 9
-        }}>
-          {dark ? '🌙' : '☀️'}
-        </div>
+        🎨
       </button>
 
       {/* ── Application routes ── */}

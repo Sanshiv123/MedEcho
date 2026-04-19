@@ -265,7 +265,7 @@ export default function Landing() {
 
         {/* ── Features — 3x2 card grid ── */}
         <section style={{ padding: "60px 60px 48px", textAlign: "center" }}>
-          <p style={{ fontFamily: "Syne, sans-serif", fontSize: 30, fontWeight: 800, color: textPrimary, marginBottom: 10 }}>
+          <p style={{ fontFamily: "sans-serif", fontSize: 30, fontWeight: 800, color: textPrimary, marginBottom: 10 }}>
             Designed for Compassionate Care
           </p>
           <p style={{ fontSize: 17, color: textMuted, maxWidth: 520, margin: "0 auto 44px", lineHeight: 1.7 }}>
@@ -291,7 +291,7 @@ export default function Landing() {
 
         {/* ── How it works — numbered steps ── */}
         <section style={{ padding: "48px 60px", textAlign: "center" }}>
-          <p style={{ fontFamily: "Syne, sans-serif", fontSize: 30, fontWeight: 800, color: textPrimary, marginBottom: 10 }}>
+          <p style={{ fontFamily: "sans-serif", fontSize: 30, fontWeight: 800, color: textPrimary, marginBottom: 10 }}>
             How It Works
           </p>
           <p style={{ fontSize: 17, color: textMuted, marginBottom: 48 }}>
@@ -315,7 +315,7 @@ export default function Landing() {
 
         {/* ── Portal breakdown — by role ── */}
         <section style={{ padding: "48px 60px", textAlign: "center" }}>
-          <p style={{ fontFamily: "Syne, sans-serif", fontSize: 30, fontWeight: 800, color: textPrimary, marginBottom: 10 }}>
+          <p style={{ fontFamily: "sans-serif", fontSize: 30, fontWeight: 800, color: textPrimary, marginBottom: 10 }}>
             Built for Every Role
           </p>
           <p style={{ fontSize: 17, color: textMuted, marginBottom: 44 }}>
@@ -347,7 +347,7 @@ export default function Landing() {
         {/* ── Bottom CTA ── */}
         <section style={{ padding: "40px 60px 80px" }}>
           <div style={{ maxWidth: 660, margin: "0 auto", background: dark ? "rgba(127,119,221,0.06)" : "rgba(127,119,221,0.05)", border: `1px solid ${dark ? "rgba(127,119,221,0.15)" : "rgba(127,119,221,0.18)"}`, borderRadius: 20, padding: "52px 40px", textAlign: "center", backdropFilter: "blur(12px)" }}>
-            <p style={{ fontFamily: "Syne, sans-serif", fontSize: 26, fontWeight: 800, color: textPrimary, marginBottom: 12 }}>
+            <p style={{ fontFamily: "sans-serif", fontSize: 26, fontWeight: 800, color: textPrimary, marginBottom: 12 }}>
               Ready to Transform Patient Communication?
             </p>
             <p style={{ fontSize: 16, color: textMuted, marginBottom: 28, lineHeight: 1.7 }}>
