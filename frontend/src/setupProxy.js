@@ -25,11 +25,5 @@ module.exports = function(app) {
     changeOrigin: true,
   }));
 
-  // Forward all /static/* requests to Flask
-  // Used for serving heatmap images and uploaded scans
-  app.use('/static', createProxyMiddleware({
-    target: 'http://127.0.0.1:5000',
-    changeOrigin: true,
-  }));
 
 };
