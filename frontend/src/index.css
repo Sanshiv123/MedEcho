@@ -1,9 +1,16 @@
+/* ============================================================
+   FONTS
+   Syne — headings | DM Sans — body | DM Mono — code/data
+   ============================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   BASE RESET & BODY
+   ============================================================ */
 * {
   box-sizing: border-box;
 }
@@ -14,10 +21,20 @@ body {
   font-family: 'DM Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+
 h1, h2, h3, h4 {
   font-family: 'Syne', sans-serif;
 }
 
+input, textarea, select {
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ============================================================
+   GLASS MORPHISM COMPONENTS
+   .glass       — static frosted panel
+   .glass-hover — interactive panel with hover state
+   ============================================================ */
 .glass {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
@@ -33,17 +50,32 @@ h1, h2, h3, h4 {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
+/* ============================================================
+   BACKGROUND TEXTURE
+   Subtle grid overlay for depth
+   ============================================================ */
 .grid-bg {
   background-image: 
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 
+/* ============================================================
+   GLOW EFFECTS
+   Used on primary action buttons and focus elements
+   ============================================================ */
 .accent-glow {
   box-shadow: 0 0 20px rgba(61, 126, 255, 0.15);
 }
 
+/* ============================================================
+   ANIMATIONS
+   fade-in     — opacity only
+   fade-in-up  — opacity + slight upward movement
+   stagger-1-5 — delayed variants for list/card sequences
+   pulse-dot   — breathing dot for loading/live indicators
+   ============================================================ */
 .fade-in {
   animation: fadeIn 0.4s ease forwards;
 }
@@ -62,12 +94,14 @@ h1, h2, h3, h4 {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Staggered entrance delays for sequential elements */
 .stagger-1 { animation-delay: 0.05s; opacity: 0; }
 .stagger-2 { animation-delay: 0.1s; opacity: 0; }
 .stagger-3 { animation-delay: 0.15s; opacity: 0; }
 .stagger-4 { animation-delay: 0.2s; opacity: 0; }
 .stagger-5 { animation-delay: 0.25s; opacity: 0; }
 
+/* Pulsing dot — used for live/processing status indicators */
 .pulse-dot {
   animation: pulseDot 2s ease-in-out infinite;
 }
@@ -77,19 +111,109 @@ h1, h2, h3, h4 {
   50% { opacity: 0.5; transform: scale(0.8); }
 }
 
-input, textarea, select {
-  font-family: 'DM Sans', sans-serif;
+/* ============================================================
+   SCROLLBAR
+   Minimal, theme-aware scrollbar styling
+   ============================================================ */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+/* ============================================================
+   LIGHT THEME
+   Applied via data-theme="light" on <html> or <body>
+   Overrides dark defaults with blue-tinted light palette
+   ============================================================ */
+[data-theme="light"] {
+  background-color: #E8EDFF !important;
+  color: #0A1628 !important;
 }
 
-::-webkit-scrollbar {
-  width: 4px;
+[data-theme="light"] .grid-bg {
+  background-color: #E8EDFF !important;
+  background-image:
+    linear-gradient(rgba(61,126,255,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61,126,255,0.08) 1px, transparent 1px) !important;
+  background-size: 40px 40px;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+[data-theme="light"] .glass {
+  background: rgba(255,255,255,0.85) !important;
+  border: 1px solid rgba(61,126,255,0.18) !important;
+  backdrop-filter: blur(20px);
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1);
-  border-radius: 2px;
+[data-theme="light"] .glass-hover:hover {
+  background: rgba(255,255,255,0.95) !important;
+}
+
+/* Force text color for all common elements in light mode */
+[data-theme="light"] p,
+[data-theme="light"] span,
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] label,
+[data-theme="light"] li,
+[data-theme="light"] a {
+  color: #0A1628 !important;
+}
+
+/* Form inputs in light mode */
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+  background: rgba(240,245,255,0.9) !important;
+  color: #0A1628 !important;
+  border-color: rgba(61,126,255,0.25) !important;
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: #6a8ab8 !important;
+}
+
+[data-theme="light"] .accent-glow {
+  box-shadow: 0 0 24px rgba(61,126,255,0.2);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(61,126,255,0.2);
+}
+
+[data-theme="light"] button {
+  color: #0A1628;
+}
+
+/* Step circles in light mode */
+[data-theme="light"] div[style*="rgba(255,255,255,0.05)"] {
+  background: rgba(61,126,255,0.08) !important;
+  border: 1px solid rgba(61,126,255,0.2) !important;
+}
+
+/* Step circle numbers in light mode */
+[data-theme="light"] div[style*="rgba(255,255,255,0.3)"] {
+  color: #4A6A9A !important;
+}
+
+/* ============================================================
+   PRINT STYLES
+   Used for PDF export of clinical reports
+   ============================================================ */
+@media print {
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  
+  /* Hide nav, buttons, non-report UI */
+  [data-print-hide] { display: none !important; }
+  
+  /* Full width report content */
+  [data-print-main] { 
+    width: 100% !important;
+    padding: 20px !important;
+  }
+
+  body { background: white !important; color: #0A1628 !important; }
+  
+  .grid-bg { background-image: none !important; background-color: white !important; }
 }
