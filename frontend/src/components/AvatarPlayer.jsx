@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 
-export default function AvatarPlayer({ phase, language, script }) {
+export default function AvatarPlayer({ phase, language, script, patientId }) {
   const [embedUrl, setEmbedUrl] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
     setEmbedUrl(null);
-    const params = new URLSearchParams({ sandbox: 'true' });
+    const params = new URLSearchParams({ sandbox: 'false' });
     if (script) params.append('script', script);
+    if (patientId) params.append('patient_id', patientId);
     
     fetch(`/api/avatar?${params.toString()}`)
       .then(r => r.json())
@@ -46,7 +47,7 @@ export default function AvatarPlayer({ phase, language, script }) {
   return (
     <iframe
       src={embedUrl}
-      allow="microphone"
+      allow="microphone; autoplay; camera"
       title="MedEcho Avatar"
       className="w-full rounded-xl"
       style={{height: '280px', border: 'none'}}
