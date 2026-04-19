@@ -17,7 +17,6 @@ A three-portal AI system that takes a chest X-ray from upload to plain-language 
 | 📹 [Demo Video](#) | Full walkthrough of all three portals — clinician upload to patient avatar delivery |
 | 📊 [Slide Deck](#) | 10-slide project overview built for the Regeneron track at HackPrinceton 2026 |
 | 🏆 [Devpost](#) | HackPrinceton 2026 submission page |
-| 📋 [PRD Document](#) | Architecture, user stories, API contracts, and Regeneron trial matching pipeline |
 
 ---
 
@@ -28,23 +27,25 @@ Clinician uploads scan + symptoms + language
         ↓
 DenseNet CNN (torchxrayvision) → Condition + confidence + urgency
         ↓
-GradCAM → heatmap overlay
+GradCAM → heatmap overlay at original scan resolution
         ↓
 Gemini 2.5 Flash (simultaneously)
-→ Clinical report for physician
-→ Phase 1 script for patient (pre-approval)
-→ Phase 2 script for patient (post-approval)
+→ Clinical report for physician (always English)
+→ Phase 1 script for patient (pre-approval, in patient's language)
+→ Phase 2 script for patient (post-approval, in patient's language)
         ↓
-ClinicalTrials.gov v2 API → live trial matching
+ClinicalTrials.gov v2 API → live trial matching with multi-factor scoring
         ↓
 ElevenLabs (eleven_multilingual_v2) → Phase 1 audio in patient's language
         ↓
-Patient sees scan immediately + HeyGen avatar delivers Phase 1 message
+Patient sees scan immediately
+LiveAvatar delivers Phase 1 message in patient's language
         ↓
-Physician reviews everything → Send to Patient
+Physician reviews everything → adds assessment → Send to Patient
         ↓
-ElevenLabs → Phase 2 audio generated
-HeyGen LiveAvatar → delivers full explanation face-to-face in patient's language
+Gemini rewrites physician assessment into plain language
+ElevenLabs → Phase 2 audio generated in patient's language
+LiveAvatar delivers full explanation face-to-face in patient's language
 ```
 
 ---
@@ -53,27 +54,31 @@ HeyGen LiveAvatar → delivers full explanation face-to-face in patient's langua
 
 ### 🔬 Clinician Portal (`/clinician`)
 - Upload chest X-ray or skin image
-- Enter patient symptoms, city, preferred language
+- Enter patient name, city, date of birth, symptoms, preferred language
 - AI immediately generates condition, confidence score, urgency level
 - GradCAM heatmap shows exactly which region drove the prediction
-- ClinicalTrials.gov matching runs simultaneously
-- Gemini generates clinical report + patient scripts
-- ElevenLabs converts Phase 1 script to audio immediately
+- ClinicalTrials.gov matching runs simultaneously with multi-factor scoring
+- Gemini generates clinical report + patient scripts in the patient's language
+- ElevenLabs converts Phase 1 script to audio in the patient's language
 - Links to physician and patient portals generated on submission
 
 ### 👨‍⚕️ Physician Portal (`/physician`)
-- Full dashboard: scan + GradCAM heatmap side by side
-- AI report with condition, confidence, urgency, differential diagnosis
-- Clinician notes and matched clinical trials with confidence scores
-- Add own assessment → hit Send to Patient
-- Case sidebar with urgency badges and real-time status
-- PDF export of full report
+- Case sidebar with pending/reviewed tabs sorted by urgency
+- Full dashboard: scan + GradCAM heatmap toggle
+- AI findings: condition, confidence bar, differential diagnosis
+- AI clinical report from Gemini
+- Patient symptoms and clinician notes
+- Matched clinical trials with percentage match scores (clickable → ClinicalTrials.gov)
+- Add own assessment → Gemini rewrites it into plain language for the patient
+- Send to Patient button transitions patient to phase 2
+- PDF export via browser print
 
 ### 🧑‍🤝‍🧑 Patient Portal (`/patient/:patientId`)
-- **Phase 1** (immediately after upload): HeyGen avatar delivers warm, non-diagnostic message in patient's language. ElevenLabs audio autoplays.
-- **Phase 2** (after physician approves): ElevenLabs voice + HeyGen avatar delivers full plain-language explanation. Trial card appears if eligible studies found.
+- **Phase 1** (immediately after upload): LiveAvatar delivers warm, non-diagnostic message in patient's language. ElevenLabs audio autoplays. Transcript shown below.
+- **Phase 2** (after physician sends assessment): ElevenLabs voice + LiveAvatar delivers full plain-language explanation. Doctor's assessment and "What This Means For You" cards appear. Trial card shown if eligible studies found.
 - Polls automatically every 5 seconds for physician approval
 - Supports English, Spanish, French, Hindi
+- Next steps panel guides patient while waiting
 
 ---
 
@@ -89,6 +94,7 @@ HeyGen LiveAvatar → delivers full explanation face-to-face in patient's langua
 | Voice | ElevenLabs eleven_multilingual_v2 |
 | Avatar | HeyGen LiveAvatar API |
 | Trial Matching | ClinicalTrials.gov v2 API |
+| Geocoding | Nominatim (OpenStreetMap) |
 | Data Storage | Flat JSON per patient, Flask static file serving |
 
 ---
@@ -128,7 +134,7 @@ cp -r ~/.cache/kagglehub/datasets/nih-chest-xrays/sample/versions/4/sample backe
 ### Prerequisites
 - Python 3.11 (3.12+ breaks torch)
 - Node.js 18+
-- API keys for Gemini, ElevenLabs, and HeyGen
+- API keys for Gemini, ElevenLabs, and HeyGen LiveAvatar
 
 ### 1. Clone the repo
 
@@ -140,7 +146,6 @@ cd MedEcho
 ### 2. Backend setup
 
 ```bash
-cd backend
 python3.11 -m venv venv
 
 # Mac/Linux
@@ -149,6 +154,7 @@ source venv/bin/activate
 # Windows
 venv\Scripts\activate
 
+cd backend
 pip install -r requirements.txt
 ```
 
@@ -159,11 +165,7 @@ pip install -r requirements.txt
 
 ### 3. Environment variables
 
-```bash
-cp .env.example .env
-```
-
-Open `.env` and fill in your API keys:
+Create a `.env` file in the project root:
 
 ```
 GEMINI_API_KEY=your_key_here
@@ -189,6 +191,8 @@ python3 app.py
 # Runs on http://127.0.0.1:5000
 ```
 
+> ⚠️ On macOS, port 5000 may be taken by AirPlay Receiver. Disable it in System Settings → General → AirDrop & Handoff → AirPlay Receiver.
+
 ### 5. Frontend setup
 
 ```bash
@@ -213,12 +217,14 @@ npm start
 
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | `/api/scan` | Upload scan → CNN + heatmap + trials + Gemini + ElevenLabs Phase 1 |
-| POST | `/api/approve/<patient_id>` | Physician sends results → Gemini Phase 2 + ElevenLabs Phase 2 |
-| GET | `/api/patient/<patient_id>` | Get full patient data |
+| POST | `/api/scan` | Upload scan → CNN + GradCAM + trial matching + Gemini + ElevenLabs Phase 1 |
+| POST | `/api/explain` | Internal — Gemini generates clinical report + patient scripts |
+| POST | `/api/approve/<patient_id>` | Physician sends assessment → Gemini rewrites + ElevenLabs Phase 2 + phase transition |
+| GET | `/api/patient/<patient_id>` | Get full patient record |
 | GET | `/api/cases` | Get all cases for physician sidebar |
 | GET | `/api/status/<patient_id>` | Poll for phase status |
-| POST | `/api/avatar` | Generate HeyGen LiveAvatar embed |
+| GET | `/api/avatar` | Create LiveAvatar embed session |
+| GET | `/files/<path>` | Serve static files (scans, heatmaps, audio) |
 
 ---
 
@@ -230,31 +236,37 @@ Each patient is stored as a flat JSON file at `backend/static/data/<patient_id>.
 {
   "patient_id": "P-xxxx",
   "patient_name": "Maria Garcia",
+  "patient_dob": "1990-03-15",
+  "patient_location": "Princeton",
   "language": "es",
+  "generation": "Millennial",
+  "symptoms": "chest pain, shortness of breath",
+  "clinician_notes": "Patient reports chest pain for 3 days",
   "condition": "Pneumonia",
   "confidence": 0.82,
-  "urgency": "Critical",
-  "urgency_reason": "Opacity detected in lower left lung",
+  "urgency": "Moderate",
+  "urgency_reason": "Finding detected → Pneumonia",
   "differential_diagnosis": ["Pneumonia", "Pleural Effusion", "Atelectasis"],
   "image_url": "/files/scans/P-xxxx.png",
-  "heatmap_url": "/files/heatmaps/P-xxxx_heatmap.png",
-  "phase1_script": "Your scan has come through clearly...",
-  "phase2_script": "Your doctor has reviewed your scan...",
-  "phase1_audio_url": "/static/audio/P-xxxx_phase1.mp3",
-  "phase2_audio_url": "/static/audio/P-xxxx_phase2.mp3",
+  "heatmap_url": "/files/heatmaps/P-xxxx.png",
   "clinical_report": "A chest X-ray analysis indicates...",
-  "clinician_notes": "Patient reports chest pain",
-  "physician_notes": "Recommend follow-up CT scan",
+  "phase1_script": "Su radiografía ha llegado claramente...",
+  "phase2_script": "Su médico ha revisado su radiografía...",
+  "phase1_audio_url": "/files/audio/P-xxxx_phase1.mp3",
+  "phase2_audio_url": "/files/audio/P-xxxx_phase2.mp3",
+  "physician_notes": "Recommend follow-up CT scan in 5 days",
   "trials": [
     {
       "name": "REGN4461 Respiratory Trial",
-      "location": "Princeton, NJ",
+      "location": "Princeton",
+      "country": "United States",
       "status": "RECRUITING",
-      "url": "https://clinicaltrials.gov/study/NCTxxxx"
+      "phase": "PHASE3",
+      "nct_id": "NCTxxxx",
+      "match_score": 74
     }
   ],
-  "phase": 1,
-  "approved": false
+  "phase": 1
 }
 ```
 
@@ -263,45 +275,55 @@ Each patient is stored as a flat JSON file at `backend/static/data/<patient_id>.
 ## Repo Structure
 
 ```
-medecho/
+MedEcho/
+├── .env                        # API keys (not committed)
 ├── backend/
-│   ├── app.py                  # Flask entry point
-│   ├── config.py               # API key loading
+│   ├── app.py                  # Flask entry point, blueprint registration
+│   ├── config.py               # API key loading from .env
 │   ├── requirements.txt
-│   ├── .env.example
 │   ├── routes/
-│   │   ├── scan.py             # POST /api/scan
+│   │   ├── scan.py             # POST /api/scan — full pipeline
+│   │   ├── explain.py          # POST /api/explain — Gemini scripts
 │   │   ├── approve.py          # POST /api/approve/<patient_id>
 │   │   ├── status.py           # GET /api/status, /api/cases
 │   │   ├── patient.py          # GET /api/patient/<patient_id>
-│   │   └── avatar.py           # POST /api/avatar
+│   │   └── avatar.py           # GET /api/avatar — LiveAvatar embed
 │   ├── medecho_model/
-│   │   ├── classifier.py       # DenseNet CNN
-│   │   ├── gradcam.py          # GradCAM heatmap
-│   │   └── urgency.py          # Urgency classification
+│   │   ├── classifier.py       # DenseNet CNN classification
+│   │   └── gradcam.py          # GradCAM heatmap generation
 │   ├── services/
-│   │   ├── gemini.py           # Gemini 2.5 Flash
-│   │   ├── elevenlabs.py       # ElevenLabs TTS
-│   │   ├── liveavatar.py       # HeyGen LiveAvatar
-│   │   └── trials.py           # ClinicalTrials.gov API
+│   │   ├── gemini.py           # Gemini 2.5 Flash — reports + scripts
+│   │   ├── elevenlabs.py       # ElevenLabs TTS — multilingual audio
+│   │   ├── heygen.py           # HeyGen video generation (legacy)
+│   │   ├── liveavatar.py       # HeyGen LiveAvatar embed sessions
+│   │   └── trials.py           # ClinicalTrials.gov API + scoring
+│   ├── utils/
+│   │   └── language.py         # Language code → Gemini instruction
+│   ├── data/
+│   │   └── medical_context.json # Condition context for Gemini prompts
 │   └── static/
 │       ├── scans/              # Uploaded X-rays
-│       ├── heatmaps/           # GradCAM outputs
+│       ├── heatmaps/           # GradCAM overlays
 │       ├── audio/              # ElevenLabs MP3s
-│       └── data/               # Patient JSONs
+│       └── data/               # Patient JSON records
 └── frontend/
     ├── src/
-    │   ├── App.js
+    │   ├── App.js              # Routes + theme toggle
+    │   ├── setupProxy.js       # Proxies /api, /files → :5000
+    │   ├── index.css           # Global styles, glass theme, animations
     │   ├── pages/
-    │   │   ├── Landing.jsx
-    │   │   ├── Clinician.jsx
-    │   │   ├── Physician.jsx
-    │   │   └── Patient.jsx
+    │   │   ├── Landing.jsx     # Marketing page + role selector
+    │   │   ├── Clinician.jsx   # Scan upload portal
+    │   │   ├── Physician.jsx   # Review + approval portal
+    │   │   └── Patient.jsx     # Results + avatar portal
     │   └── components/
-    │       ├── AvatarPlayer.jsx
-    │       ├── TrialCard.jsx
-    │       └── LanguageSelector.jsx
-    └── setupProxy.js           # Proxies /api, /static, /files → :5000
+    │       ├── AvatarPlayer.jsx      # LiveAvatar iframe embed
+    │       ├── MedEchoLogo.jsx       # Animated SVG ECG→heart logo
+    │       ├── TrialCard.jsx         # Patient-facing trial notification
+    │       ├── TranscriptPanel.jsx   # Phase 1 script display
+    │       └── LanguageSelector.jsx  # Language display
+    └── public/
+        └── index.html
 ```
 
 ---
@@ -310,12 +332,12 @@ medecho/
 
 Built at **HackPrinceton Spring 2026** in 24 hours.
 
-| Name | 
+| Name |
 |---|
-| Sanchusri Kavitha babu |
-| Jane Sanjana Prasanna | 
-| Arundhati | 
-| Raashi | 
+| Jane Sanjana Prasanna |
+| Sanchusri Kavitha Babu |
+| Arundhati |
+| Raashi |
 
 ---
 
