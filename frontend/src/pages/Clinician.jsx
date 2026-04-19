@@ -25,6 +25,7 @@ export default function Clinician() {
   const [preview, setPreview] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [step, setStep] = useState(1);
+  const [patientDob, setPatientDob] = useState("");
   const [patientName, setPatientName] = useState("");
   const [patientLocation, setPatientLocation] = useState("");
   const [symptoms, setSymptoms] = useState("");
@@ -51,6 +52,7 @@ export default function Clinician() {
     formData.append("patient_id", patientId.current);
     formData.append("patient_name", patientName);
     formData.append("patient_location", patientLocation);
+    formData.append("patient_dob", patientDob);
 
     const res = await fetch("/api/scan", { method: "POST", body: formData });
     const data = await res.json();
@@ -163,6 +165,17 @@ export default function Clinician() {
                 <Label>Patient city</Label>
                 <Input value={patientLocation} onChange={(e) => setPatientLocation(e.target.value)} placeholder="New York" />
               </div>
+
+              <div>
+                <Label>Date of birth</Label>
+                <input
+                    type="date"
+                    value={patientDob}
+                    onChange={(e) => setPatientDob(e.target.value)}
+                    className="w-full glass rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-all"
+                    style={{border: '1px solid rgba(255,255,255,0.07)', colorScheme: 'dark'}}
+                />
+                </div>
 
               <div>
                 <Label>Patient language</Label>

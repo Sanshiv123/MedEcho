@@ -12,6 +12,24 @@ scan_bp = Blueprint('scan', __name__)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+def get_generation(dob_str):
+    if not dob_str:
+        return "General"
+    try:
+        birth_year = int(dob_str.split('-')[0])
+        if birth_year <= 1945:
+            return "Silent Generation"
+        elif birth_year <= 1964:
+            return "Baby Boomer"
+        elif birth_year <= 1980:
+            return "Gen X"
+        elif birth_year <= 1996:
+            return "Millennial"
+        else:
+            return "Gen Z"
+    except:
+        return "General"
+
 @scan_bp.route('/api/scan', methods=['POST'])
 def scan():
     if 'image' not in request.files:
@@ -22,7 +40,8 @@ def scan():
     patient_name = request.form.get('patient_name', 'Unknown')
     language = request.form.get('language', 'en')
     patient_location = request.form.get('patient_location', '')
-
+    patient_dob = request.form.get('patient_dob', '')
+    generation = get_generation(patient_dob)
 
     scan_dir = os.path.join(BASE_DIR, 'static', 'scans')
     os.makedirs(scan_dir, exist_ok=True)
@@ -48,8 +67,9 @@ def scan():
     result['physician_notes'] = ""
     result['phase'] = 1
     result['patient_location'] = patient_location
+    result['patient_dob'] = patient_dob
+    result['generation'] = generation
 
-    # Call Gemini explain endpoint
     try:
         explain_res = requests.post(
             "http://127.0.0.1:5000/api/explain",
@@ -58,7 +78,8 @@ def scan():
                 "condition": result["condition"],
                 "confidence": result["confidence"],
                 "urgency": result["urgency"],
-                "language": language
+                "language": language,
+                "generation": generation
             },
             timeout=30
         )
@@ -78,4 +99,3 @@ def scan():
         json.dump(result, f)
 
     return jsonify(result)
-    

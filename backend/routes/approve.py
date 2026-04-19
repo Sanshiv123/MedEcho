@@ -23,7 +23,8 @@ def approve(patient_id):
         phase2_script = generate_phase2_from_assessment(
             physician_notes=physician_notes,
             condition=data.get('condition', ''),
-            language=data.get('language', 'en')
+            language=data.get('language', 'en'),
+            generation=data.get('generation', 'General')
         )
     except Exception as e:
         print(f"Gemini phase2 error: {e}")

@@ -26,7 +26,8 @@ def explain():
         confidence=data["confidence"],
         urgency=data["urgency"],
         language=data["language"],
-        patient_id=data["patient_id"]
+        patient_id=data["patient_id"],
+        generation=generation
     )
 
     return jsonify({

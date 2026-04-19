@@ -210,18 +210,31 @@ export default function Physician() {
                 <SectionLabel>Matched Clinical Trials</SectionLabel>
                 <div className="flex flex-col gap-2">
                   {data.trials.map((trial, i) => (
-                    <div key={i} className="rounded-xl p-3 flex flex-col gap-1.5" style={{background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)'}}>
-                      <p className="text-white/70 text-xs font-medium leading-snug">{trial.name}</p>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs px-2 py-0.5 rounded-full" style={{color: '#10B981', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)'}}>
-                          {trial.status}
-                        </span>
-                        <span className="text-white/25 text-xs">{trial.location}</span>
-                      </div>
+                    <div
+                        key={i}
+                        className="rounded-xl p-3 flex flex-col gap-1.5 cursor-pointer transition-all"
+                        style={{background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)'}}
+                        onClick={() => trial.nct_id && window.open(`https://clinicaltrials.gov/study/${trial.nct_id}`, '_blank')}
+                        >
+                        <p className="text-white/70 text-xs font-medium leading-snug">{trial.name}</p>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <span className="text-xs px-2 py-0.5 rounded-full" style={{color: '#10B981', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)'}}>
+                            {trial.status}
+                            </span>
+                            {trial.phase && trial.phase !== "N/A" && (
+                            <span className="text-xs px-2 py-0.5 rounded-full" style={{color: '#3D7EFF', background: 'rgba(61,126,255,0.1)', border: '1px solid rgba(61,126,255,0.2)'}}>
+                                {trial.phase}
+                            </span>
+                            )}
+                            <span className="text-white/25 text-xs">{trial.location}</span>
+                            {trial.nct_id && (
+                            <span className="text-xs ml-auto" style={{color: '#3D7EFF'}}>View →</span>
+                            )}
+                        </div>
+                        </div>
+                    ))}
                     </div>
-                  ))}
-                </div>
-              </Card>
+                </Card>
             )}
 
             {/* Send button */}
