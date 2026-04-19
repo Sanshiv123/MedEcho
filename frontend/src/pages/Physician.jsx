@@ -26,6 +26,7 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import MedEchoLogo from '../components/MedEchoLogo';
 
 // ---------------------------------------------------------------------------
 // Reusable section label
@@ -196,12 +197,13 @@ const Sidebar = () => {
       }}
     >
       {/* Brand mark */}
-      <div style={{ padding: '18px 18px 14px', borderBottom: `1px solid ${sidebarBorder}` }}>
-        <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 17, fontWeight: 700, color: textPrimary }}>
-          Med<span style={{ color: '#D4537E' }}>Echo</span>
-        </p>
-        <p style={{ fontSize: 11, color: textMuted, marginTop: 2 }}>Physician Portal</p>
-      </div>
+      {/* Brand mark */}
+<div style={{ padding: '18px 18px 14px', borderBottom: `1px solid ${sidebarBorder}` }}>
+  <div style={{ width: '130px' }}>
+    <MedEchoLogo width="130" height="auto" />
+  </div>
+  <p style={{ fontSize: 11, color: textMuted, marginTop: 2 }}>Physician Portal</p>
+</div>
 
       {/* Pending / Reviewed tabs */}
       <div style={{ display: 'flex', padding: '12px 12px 6px', gap: 6 }}>
