@@ -7,7 +7,7 @@ from config import LIVEAVATAR_API_KEY, LIVEAVATAR_CONTEXT_ID
 LIVEAVATAR_BASE = "https://api.liveavatar.com"
 SANDBOX_AVATAR_ID = "dd73ea75-1218-4ef3-92ce-606d5f7fbc0a"
 
-def create_embed(is_sandbox=False, greeting=None):
+def create_embed(is_sandbox=False, greeting=None, knowledge=None):
     headers = {
         "X-API-KEY": LIVEAVATAR_API_KEY,
         "Content-Type": "application/json"
@@ -19,6 +19,8 @@ def create_embed(is_sandbox=False, greeting=None):
     }
     if greeting:
         payload["greeting"] = greeting
+    if knowledge:
+        payload["knowledge"] = knowledge
     response = requests.post(
         f"{LIVEAVATAR_BASE}/v2/embeddings",
         json=payload,
