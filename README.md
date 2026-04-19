@@ -338,7 +338,7 @@ Built at **HackPrinceton Spring 2026** in 24 hours.
 | Jane Sanjana Prasanna |
 | Sanchusri Kavitha Babu |
 | Arundhati |
-| Raashi |
+| Rashi Jain |
 
 ---
 
