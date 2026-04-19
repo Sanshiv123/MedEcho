@@ -1,4 +1,4 @@
-# MedEcho 🫁
+# MedEcho 
 
 > **Medical Results, Human Understanding.**
 
