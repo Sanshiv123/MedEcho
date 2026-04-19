@@ -18,6 +18,7 @@
 //   Right — scan upload (drag and drop or click to browse)
 
 import { useEffect, useRef, useState } from "react";
+import MedEchoLogo from '../components/MedEchoLogo';
 
 // ---------------------------------------------------------------------------
 // Reusable styled primitives
@@ -206,10 +207,13 @@ export default function Clinician() {
     <div className="min-h-screen grid-bg flex flex-col items-center justify-center p-8 gap-8">
 
       {/* Header — portal title + active session badge */}
+      {/* Header — portal title + active session badge */}
       <div className="fade-in-up stagger-1 w-full max-w-5xl flex items-center justify-between">
-        <div>
-          <h1 style={{fontFamily: 'Syne, sans-serif'}} className="text-2xl font-bold text-white">MedEcho</h1>
-          <p className="text-white/30 text-xs mt-0.5">Clinician Portal</p>
+        <div className="flex items-center gap-3">
+          <div style={{ width: '160px', flexShrink: 0 }}>
+            <MedEchoLogo width="160" height="auto" />
+          </div>
+          <p className="text-white/30 text-xs">Clinician Portal</p>
         </div>
         <div
           className="px-3 py-1.5 rounded-full text-xs flex items-center gap-2"
