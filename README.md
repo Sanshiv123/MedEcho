@@ -14,9 +14,10 @@ A three-portal AI system that takes a chest X-ray from upload to plain-language 
 
 | Resource | Description |
 |---|---|
-| 📹 [Demo Video](#) | Full walkthrough of all three portals |
-| 📊 [Slide Deck](#) | 10-slide project overview for the Regeneron track |
-| 🏆 [Devpost](#) | HackPrinceton 2026 submission |
+| 📹 [Demo Video](#) | Full walkthrough of all three portals — clinician upload to patient avatar delivery |
+| 📊 [Slide Deck](#) | 10-slide project overview built for the Regeneron track at HackPrinceton 2026 |
+| 🏆 [Devpost](#) | HackPrinceton 2026 submission page |
+| 📋 [PRD Document](#) | Architecture, user stories, API contracts, and Regeneron trial matching pipeline |
 
 ---
 
