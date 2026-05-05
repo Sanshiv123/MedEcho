@@ -10,9 +10,6 @@ numpy
 requests
 google-generativeai
 elevenlabs
-<<<<<<< HEAD
-opencv-python-headless
-=======
 opencv-python-headless
 kagglehub
->>>>>>> origin/sanchu/feature/cnn-gradcam
+pip install -r requirements.txt

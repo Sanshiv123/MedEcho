@@ -1,28 +1,5 @@
 // frontend/src/pages/Physician.jsx
 // Physician portal — the clinical review interface for MedEcho.
-//
-// Layout: persistent sidebar (case list) + scrollable main content area.
-//
-// Sidebar:
-//   - Lists all patient cases fetched from /api/cases
-//   - Tabs: Pending (phase 1) and Reviewed (phase 2)
-//   - Manual patient ID lookup input
-//   - Navigates to /physician/:patientId on case selection
-//
-// Main content (when a patient is selected):
-//   Left column:
-//     - Scan / GradCAM heatmap toggle
-//     - AI findings: condition, confidence bar, differential diagnosis
-//     - AI clinical report from Gemini
-//   Right column:
-//     - Patient symptoms
-//     - Clinician notes
-//     - Physician assessment textarea (sent to Gemini for plain-language rewrite)
-//     - Matched clinical trials with match scores (clickable → ClinicalTrials.gov)
-//     - Send to Patient button (calls /api/approve)
-//
-// Theme-aware — adapts to light/dark mode via data-theme on document.body.
-// PDF export via browser print (window.print()).
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -32,15 +9,11 @@ import MedEchoLogo from '../components/MedEchoLogo';
 // Reusable section label
 // ---------------------------------------------------------------------------
 
-/**
- * Uppercase muted label used as a section header within cards.
- * Adapts color to the current theme via inherited text color.
- */
 const SectionLabel = ({ children }) => (
   <p style={{
     fontFamily: 'Syne, sans-serif',
-    fontSize: 11,
-    fontWeight: 600,
+    fontSize: 13,           // CHANGED: 11 → 13
+    fontWeight: 700,
     color: 'rgba(255,255,255,0.3)',
     textTransform: 'uppercase',
     letterSpacing: '0.8px',
@@ -55,7 +28,6 @@ const SectionLabel = ({ children }) => (
 // Urgency color config
 // ---------------------------------------------------------------------------
 
-/** Maps urgency level to color, background, and border values */
 const URGENCY_CONFIG = {
   Critical: { color: "#EF4444", bg: "rgba(239,68,68,0.1)",  border: "rgba(239,68,68,0.25)" },
   Moderate: { color: "#F59E0B", bg: "rgba(245,158,11,0.1)", border: "rgba(245,158,11,0.25)" },
@@ -71,37 +43,24 @@ export default function Physician() {
   const { patientId } = useParams();
   const navigate = useNavigate();
 
-  // Sidebar state
   const [manualId, setManualId] = useState("");
   const [cases, setCases] = useState([]);
   const [activeTab, setActiveTab] = useState("pending");
-
-  // Patient data state
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  // Assessment and send state
   const [physicianNotes, setPhysicianNotes] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
-
-  // UI state
   const [showHeatmap, setShowHeatmap] = useState(false);
-  const [, forceUpdate] = useState(0); // For theme re-renders
+  const [, forceUpdate] = useState(0);
 
-  // ---------------------------------------------------------------------------
-  // Theme observer — re-render when data-theme changes
-  // ---------------------------------------------------------------------------
   useEffect(() => {
     const obs = new MutationObserver(() => forceUpdate(n => n + 1));
     obs.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
     return () => obs.disconnect();
   }, []);
 
-  // ---------------------------------------------------------------------------
-  // Theme-aware color palette
-  // ---------------------------------------------------------------------------
   const isDark       = document.body.getAttribute('data-theme') !== 'light';
   const sidebarBg    = isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.7)';
   const sidebarBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(61,126,255,0.15)';
@@ -111,11 +70,6 @@ export default function Physician() {
   const cardBorder   = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(61,126,255,0.12)';
   const innerBg      = isDark ? 'rgba(255,255,255,0.02)' : 'rgba(61,126,255,0.04)';
 
-  // ---------------------------------------------------------------------------
-  // Case list fetch
-  // Re-fetches whenever the physician sends an assessment (sent changes)
-  // so the sidebar tabs update immediately
-  // ---------------------------------------------------------------------------
   useEffect(() => {
     fetch('/api/cases')
       .then(r => r.json())
@@ -123,10 +77,6 @@ export default function Physician() {
       .catch(() => setCases([]));
   }, [sent]);
 
-  // ---------------------------------------------------------------------------
-  // Patient data fetch
-  // Triggered when patientId changes (case selected from sidebar or URL change)
-  // ---------------------------------------------------------------------------
   useEffect(() => {
     if (!patientId) { setData(null); return; }
     setLoading(true);
@@ -140,18 +90,12 @@ export default function Physician() {
         if (d.error) { setError(d.error); setLoading(false); return; }
         setData(d);
         setPhysicianNotes(d.physician_notes || "");
-        // If already in phase 2, mark as sent so button shows "Sent to Patient"
         setSent(d.phase === 2);
         setLoading(false);
       })
       .catch(() => { setError("Failed to load patient data."); setLoading(false); });
   }, [patientId]);
 
-  // ---------------------------------------------------------------------------
-  // Send assessment to patient
-  // Calls /api/approve which runs Gemini to convert notes to plain language
-  // and transitions the patient to phase 2
-  // ---------------------------------------------------------------------------
   const handleSend = async () => {
     setSending(true);
     await fetch(`/api/approve/${patientId}`, {
@@ -163,154 +107,175 @@ export default function Physician() {
     setSent(true);
   };
 
-  // ---------------------------------------------------------------------------
-  // Derived values
-  // ---------------------------------------------------------------------------
   const pendingCases  = cases.filter(c => c.phase === 1);
   const reviewedCases = cases.filter(c => c.phase === 2);
 
 
   // ---------------------------------------------------------------------------
-  // Sidebar component
-  // Rendered in all states (empty, loading, error, data)
-  // so the case list is always accessible
+  // Sidebar
   // ---------------------------------------------------------------------------
-const Sidebar = () => {
-  const URGENCY_ORDER = { Critical: 0, Moderate: 1, Low: 2 };
-  const sortedPending = [...pendingCases].sort((a, b) =>
-    (URGENCY_ORDER[a.urgency] ?? 3) - (URGENCY_ORDER[b.urgency] ?? 3)
-  );
+  const Sidebar = () => {
+    const URGENCY_ORDER = { Critical: 0, Moderate: 1, Low: 2 };
+    const sortedPending = [...pendingCases].sort((a, b) =>
+      (URGENCY_ORDER[a.urgency] ?? 3) - (URGENCY_ORDER[b.urgency] ?? 3)
+    );
 
-  return (
-    <div
-      data-print-hide
-      style={{
-        width: 300,
-        background: sidebarBg,
-        borderRight: `1px solid ${sidebarBorder}`,
-        display: 'flex',
-        flexDirection: 'column',
-        flexShrink: 0,
-        height: '100vh',
-        position: 'sticky',
-        top: 0
-      }}
-    >
-      {/* Brand mark */}
-      {/* Brand mark */}
-<div style={{ padding: '18px 18px 14px', borderBottom: `1px solid ${sidebarBorder}` }}>
-  <div style={{ width: '130px' }}>
-    <MedEchoLogo width="130" height="auto" />
-  </div>
-  <p style={{ fontSize: 11, color: textMuted, marginTop: 2 }}>Physician Portal</p>
-</div>
+    return (
+      <div
+        data-print-hide
+        style={{
+          width: 300,
+          background: sidebarBg,
+          borderRight: `1px solid ${sidebarBorder}`,
+          display: 'flex',
+          flexDirection: 'column',
+          flexShrink: 0,
+          height: '100vh',
+          position: 'sticky',
+          top: 0
+        }}
+      >
+        {/* CHANGED: Brand mark — logo 130→180, height auto→66, added gap between logo and label,
+            increased label font size, fixed crowding with flex layout */}
+        <div style={{
+          padding: 'px px px',
+          borderBottom: `1px solid ${sidebarBorder}`,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          height: 72
+        }}>
+          <div style={{ flexShrink: 0 }}>
+            <MedEchoLogo width="150" height="55" />
+          </div>
+          {/* Divider */}
+          <div style={{
+            width: 1, height: 28,
+            marginLeft: 0,
+            background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(61,126,255,0.2)',
+            flexShrink: 0
+          }} />
+          <p style={{
+            fontSize: 14,
+            fontWeight: 700,
+            color: textMuted,
+            fontFamily: 'Syne, sans-serif',
+            margin: 0,
+            whiteSpace: 'nowrap',
+            marginLeft: 10,
+          }}>
+            Physician Portal
+          </p>
+        </div>
 
-      {/* Pending / Reviewed tabs */}
-      <div style={{ display: 'flex', padding: '12px 12px 6px', gap: 6 }}>
-        {['pending', 'reviewed'].map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
+        {/* Tabs */}
+        <div style={{ display: 'flex', padding: '12px 12px 6px', gap: 6 }}>
+          {['pending', 'reviewed'].map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                flex: 1, padding: '7px 0', borderRadius: 8,
+                fontSize: 12,             // CHANGED: 11 → 12
+                fontWeight: 700,
+                fontFamily: 'Syne, sans-serif',
+                cursor: 'pointer', border: 'none',
+                background: activeTab === tab
+                  ? (isDark ? 'rgba(61,126,255,0.15)' : 'rgba(61,126,255,0.1)')
+                  : 'transparent',
+                color: activeTab === tab ? '#6FA3FF' : textMuted,
+                textTransform: 'capitalize',
+                transition: 'all 0.15s'
+              }}
+            >
+              {tab} ({tab === 'pending' ? pendingCases.length : reviewedCases.length})
+            </button>
+          ))}
+        </div>
+
+        {/* Case list */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '4px 8px' }}>
+          {(activeTab === 'pending' ? sortedPending : reviewedCases).length === 0 ? (
+            <div style={{ padding: 24, textAlign: 'center' }}>
+              <p style={{ fontSize: 14, color: textMuted }}>No {activeTab} cases</p>
+            </div>
+          ) : (
+            (activeTab === 'pending' ? sortedPending : reviewedCases).map(c => {
+              const isActive = c.patient_id === patientId;
+              const uc = URGENCY_CONFIG[c.urgency] || URGENCY_CONFIG.Low;
+              return (
+                <button
+                  key={c.patient_id}
+                  onClick={() => navigate(`/physician/${c.patient_id}`)}
+                  style={{
+                    width: '100%', padding: '11px 13px', borderRadius: 12, marginBottom: 4,
+                    background: isActive
+                      ? (isDark ? 'rgba(61,126,255,0.1)' : 'rgba(61,126,255,0.08)')
+                      : 'transparent',
+                    border: `1px solid ${isActive ? 'rgba(61,126,255,0.28)' : 'transparent'}`,
+                    cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s'
+                  }}
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(61,126,255,0.05)'; }}
+                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: textPrimary, fontFamily: 'Syne, sans-serif' }}>
+                      {c.patient_name}
+                    </p>
+                    {c.urgency && (
+                      <span style={{
+                        fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 20,
+                        color: uc.color, background: uc.bg, border: `1px solid ${uc.border}`
+                      }}>
+                        {c.urgency}
+                      </span>
+                    )}
+                  </div>
+                  <p style={{ fontSize: 12, color: textMuted }}>
+                    {c.condition} · {c.language?.toUpperCase()}
+                  </p>
+                </button>
+              );
+            })
+          )}
+        </div>
+
+        {/* Manual patient ID lookup */}
+        <div style={{ padding: '12px', borderTop: `1px solid ${sidebarBorder}` }}>
+          <input
+            value={manualId}
+            onChange={e => setManualId(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && manualId.trim()) navigate(`/physician/${manualId.trim()}`); }}
+            placeholder="Paste patient ID..."
             style={{
-              flex: 1, padding: '7px 0', borderRadius: 8,
-              fontSize: 11, fontWeight: 600,
-              fontFamily: 'Syne, sans-serif',
-              cursor: 'pointer', border: 'none',
-              background: activeTab === tab
-                ? (isDark ? 'rgba(61,126,255,0.15)' : 'rgba(61,126,255,0.1)')
-                : 'transparent',
-              color: activeTab === tab ? '#6FA3FF' : textMuted,
-              textTransform: 'capitalize',
-              transition: 'all 0.15s'
+              width: '100%',
+              background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(240,245,255,0.9)',
+              border: `1px solid ${cardBorder}`,
+              borderRadius: 8, padding: '8px 12px',
+              fontSize: 13, color: textPrimary,   // CHANGED: 12→13
+              outline: 'none', fontFamily: 'DM Mono, monospace',
+              marginBottom: 8, boxSizing: 'border-box'
+            }}
+          />
+          <button
+            onClick={() => { if (manualId.trim()) navigate(`/physician/${manualId.trim()}`); }}
+            style={{
+              width: '100%', padding: '8px', borderRadius: 8,
+              fontSize: 13, fontWeight: 700,      // CHANGED: 12→13
+              background: isDark ? 'rgba(61,126,255,0.12)' : 'rgba(61,126,255,0.1)',
+              border: '1px solid rgba(61,126,255,0.22)',
+              color: '#6FA3FF', cursor: 'pointer', fontFamily: 'Syne, sans-serif'
             }}
           >
-            {tab} ({tab === 'pending' ? pendingCases.length : reviewedCases.length})
+            Load Patient →
           </button>
-        ))}
+        </div>
       </div>
+    );
+  };
 
-      {/* Case list — filtered by active tab, pending sorted by urgency */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '4px 8px' }}>
-        {(activeTab === 'pending' ? sortedPending : reviewedCases).length === 0 ? (
-          <div style={{ padding: 24, textAlign: 'center' }}>
-            <p style={{ fontSize: 13, color: textMuted }}>No {activeTab} cases</p>
-          </div>
-        ) : (
-          (activeTab === 'pending' ? sortedPending : reviewedCases).map(c => {
-            const isActive = c.patient_id === patientId;
-            const uc = URGENCY_CONFIG[c.urgency] || URGENCY_CONFIG.Low;
-            return (
-              <button
-                key={c.patient_id}
-                onClick={() => navigate(`/physician/${c.patient_id}`)}
-                style={{
-                  width: '100%', padding: '11px 13px', borderRadius: 12, marginBottom: 4,
-                  background: isActive
-                    ? (isDark ? 'rgba(61,126,255,0.1)' : 'rgba(61,126,255,0.08)')
-                    : 'transparent',
-                  border: `1px solid ${isActive ? 'rgba(61,126,255,0.28)' : 'transparent'}`,
-                  cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s'
-                }}
-                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(61,126,255,0.05)'; }}
-                onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: textPrimary, fontFamily: 'Syne, sans-serif' }}>
-                    {c.patient_name}
-                  </p>
-                  {c.urgency && (
-                    <span style={{
-                      fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 20,
-                      color: uc.color, background: uc.bg, border: `1px solid ${uc.border}`
-                    }}>
-                      {c.urgency}
-                    </span>
-                  )}
-                </div>
-                <p style={{ fontSize: 11, color: textMuted }}>
-                  {c.condition} · {c.language?.toUpperCase()}
-                </p>
-              </button>
-            );
-          })
-        )}
-      </div>
-
-      {/* Manual patient ID lookup */}
-      <div style={{ padding: '12px', borderTop: `1px solid ${sidebarBorder}` }}>
-        <input
-          value={manualId}
-          onChange={e => setManualId(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && manualId.trim()) navigate(`/physician/${manualId.trim()}`); }}
-          placeholder="Paste patient ID..."
-          style={{
-            width: '100%',
-            background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(240,245,255,0.9)',
-            border: `1px solid ${cardBorder}`,
-            borderRadius: 8, padding: '8px 12px',
-            fontSize: 12, color: textPrimary,
-            outline: 'none', fontFamily: 'DM Mono, monospace',
-            marginBottom: 8, boxSizing: 'border-box'
-          }}
-        />
-        <button
-          onClick={() => { if (manualId.trim()) navigate(`/physician/${manualId.trim()}`); }}
-          style={{
-            width: '100%', padding: '8px', borderRadius: 8,
-            fontSize: 12, fontWeight: 600,
-            background: isDark ? 'rgba(61,126,255,0.12)' : 'rgba(61,126,255,0.1)',
-            border: '1px solid rgba(61,126,255,0.22)',
-            color: '#6FA3FF', cursor: 'pointer', fontFamily: 'Syne, sans-serif'
-          }}
-        >
-          Load Patient →
-        </button>
-      </div>
-    </div>
-  );
-};
   // ---------------------------------------------------------------------------
-  // Empty state — no patient selected
+  // Empty / loading / error states
   // ---------------------------------------------------------------------------
   if (!patientId || (!data && !loading && !error)) return (
     <div className="min-h-screen grid-bg flex" style={{ color: textPrimary }}>
@@ -327,8 +292,8 @@ const Sidebar = () => {
               <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
           </div>
-          <p style={{ fontSize: 15, fontWeight: 600, color: textMuted, fontFamily: 'Syne, sans-serif' }}>Select a case</p>
-          <p style={{ fontSize: 13, color: textMuted, marginTop: 4, opacity: 0.6 }}>Choose from the sidebar to begin review</p>
+          <p style={{ fontSize: 16, fontWeight: 700, color: textMuted, fontFamily: 'Syne, sans-serif' }}>Select a case</p>
+          <p style={{ fontSize: 14, color: textMuted, marginTop: 4, opacity: 0.6 }}>Choose from the sidebar to begin review</p>
         </div>
       </div>
     </div>
@@ -338,7 +303,7 @@ const Sidebar = () => {
     <div className="min-h-screen grid-bg flex" style={{ color: textPrimary }}>
       <Sidebar />
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: textMuted, fontSize: 14 }}>Loading patient data...</p>
+        <p style={{ color: textMuted, fontSize: 15 }}>Loading patient data...</p>
       </div>
     </div>
   );
@@ -347,7 +312,7 @@ const Sidebar = () => {
     <div className="min-h-screen grid-bg flex" style={{ color: textPrimary }}>
       <Sidebar />
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: '#EF4444', fontSize: 14 }}>{error}</p>
+        <p style={{ color: '#EF4444', fontSize: 15 }}>{error}</p>
       </div>
     </div>
   );
@@ -358,14 +323,12 @@ const Sidebar = () => {
   const urg = URGENCY_CONFIG[data.urgency] || URGENCY_CONFIG.Low;
   const confidencePct = Math.round(data.confidence * 100);
 
-  // Confidence bar color — green high, blue moderate, amber low
   const confidenceBarColor = confidencePct >= 80
     ? 'linear-gradient(90deg, #10B981, #34D399)'
     : confidencePct >= 60
       ? 'linear-gradient(90deg, #3D7EFF, #60A5FA)'
       : 'linear-gradient(90deg, #F59E0B, #FBBF24)';
 
-  // Confidence guidance text — mirrors Gemini's confidence-adaptive language
   const confidenceGuidance = confidencePct >= 80
     ? 'High confidence — direct communication recommended'
     : confidencePct >= 60
@@ -379,30 +342,27 @@ const Sidebar = () => {
     <div className="min-h-screen grid-bg flex" style={{ color: textPrimary }}>
       <Sidebar />
 
-      {/* Scrollable main content */}
       <div data-print-main style={{ flex: 1, overflowY: 'auto', padding: '28px 32px' }}>
         <div style={{ maxWidth: 980, margin: '0 auto' }}>
 
-          {/* ── Header — patient name, metadata, PDF export ── */}
+          {/* ── Header ── */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
             <div>
-              <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 22, fontWeight: 700, color: textPrimary }}>
+              <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 26, fontWeight: 700, color: textPrimary }}>
                 {data.patient_name}
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 12, color: textMuted }}>{data.language?.toUpperCase()}</span>
+                <span style={{ fontSize: 13, color: textMuted }}>{data.language?.toUpperCase()}</span>
                 <span style={{ color: textMuted }}>·</span>
-                <span style={{ fontSize: 11, color: textMuted, fontFamily: 'DM Mono, monospace' }}>{data.patient_id}</span>
-                {/* Urgency badge */}
+                <span style={{ fontSize: 12, color: textMuted, fontFamily: 'DM Mono, monospace' }}>{data.patient_id}</span>
                 <span style={{
-                  fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 20,
+                  fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 20,
                   color: urg.color, background: urg.bg, border: `1px solid ${urg.border}`,
                   fontFamily: 'Syne, sans-serif'
                 }}>{data.urgency}</span>
-                {/* Sent confirmation badge */}
                 {sent && (
                   <span style={{
-                    fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 20,
+                    fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 20,
                     color: '#10B981', background: 'rgba(16,185,129,0.1)',
                     border: '1px solid rgba(16,185,129,0.2)', fontFamily: 'Syne, sans-serif'
                   }}>✓ Sent to Patient</span>
@@ -410,11 +370,10 @@ const Sidebar = () => {
               </div>
             </div>
 
-            {/* PDF export — triggers browser print dialog */}
             <button
               onClick={() => window.print()}
               style={{
-                padding: '8px 16px', borderRadius: 10, fontSize: 12, fontWeight: 600,
+                padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 700,
                 background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(61,126,255,0.07)',
                 border: `1px solid ${cardBorder}`, color: textMuted,
                 cursor: 'pointer', fontFamily: 'Syne, sans-serif',
@@ -438,7 +397,6 @@ const Sidebar = () => {
               <div style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, padding: 16 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                   <SectionLabel>{showHeatmap ? "GradCAM Heatmap" : "Original Scan"}</SectionLabel>
-                  {/* Scan / Heatmap toggle buttons */}
                   <div style={{
                     display: 'flex',
                     background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(61,126,255,0.06)',
@@ -450,7 +408,7 @@ const Sidebar = () => {
                         onClick={() => setShowHeatmap(i === 1)}
                         style={{
                           padding: '4px 12px', borderRadius: 6,
-                          fontSize: 11, fontWeight: 600,
+                          fontSize: 12, fontWeight: 700,          // CHANGED: 11→12
                           fontFamily: 'Syne, sans-serif',
                           cursor: 'pointer', border: 'none',
                           background: showHeatmap === (i === 1)
@@ -470,9 +428,8 @@ const Sidebar = () => {
                   alt={showHeatmap ? "Heatmap" : "Scan"}
                   style={{ width: '100%', borderRadius: 10, objectFit: 'contain', maxHeight: 260 }}
                 />
-                {/* GradCAM explanation note */}
                 {showHeatmap && (
-                  <p style={{ fontSize: 11, color: textMuted, textAlign: 'center', marginTop: 8 }}>
+                  <p style={{ fontSize: 12, color: textMuted, textAlign: 'center', marginTop: 8 }}>
                     Highlighted regions indicate areas of diagnostic relevance
                   </p>
                 )}
@@ -482,26 +439,24 @@ const Sidebar = () => {
               <div style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, padding: 16 }}>
                 <SectionLabel>AI Findings</SectionLabel>
 
-                {/* Primary condition + urgency */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
                   <div>
-                    <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 20, fontWeight: 700, color: textPrimary }}>
+                    <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 22, fontWeight: 700, color: textPrimary }}>
                       {data.condition}
                     </p>
-                    <p style={{ fontSize: 11, color: textMuted, marginTop: 2 }}>Primary condition</p>
+                    <p style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>Primary condition</p>
                   </div>
                   <span style={{
-                    fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 20,
+                    fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 20,
                     color: urg.color, background: urg.bg, border: `1px solid ${urg.border}`,
                     fontFamily: 'Syne, sans-serif'
                   }}>{data.urgency}</span>
                 </div>
 
-                {/* Confidence bar — color adapts to confidence level */}
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-                    <p style={{ fontSize: 11, color: textMuted }}>Confidence Level</p>
-                    <p style={{ fontSize: 15, fontWeight: 700, color: textPrimary, fontFamily: 'DM Mono, monospace' }}>
+                    <p style={{ fontSize: 12, color: textMuted }}>Confidence Level</p>
+                    <p style={{ fontSize: 16, fontWeight: 700, color: textPrimary, fontFamily: 'DM Mono, monospace' }}>
                       {confidencePct}%
                     </p>
                   </div>
@@ -513,19 +468,17 @@ const Sidebar = () => {
                       transition: 'width 0.6s ease'
                     }} />
                   </div>
-                  {/* Confidence guidance — mirrors Gemini's confidence-adaptive language */}
-                  <p style={{ fontSize: 10, color: textMuted, marginTop: 5 }}>
+                  <p style={{ fontSize: 11, color: textMuted, marginTop: 5 }}>
                     {confidenceGuidance}
                   </p>
                 </div>
 
-                {/* Differential diagnosis chips */}
                 <div>
-                  <p style={{ fontSize: 11, color: textMuted, marginBottom: 8 }}>Differential diagnosis</p>
+                  <p style={{ fontSize: 12, color: textMuted, marginBottom: 8 }}>Differential diagnosis</p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {data.differential_diagnosis?.map((d, i) => (
                       <span key={i} style={{
-                        fontSize: 11, color: textMuted, padding: '4px 10px', borderRadius: 20,
+                        fontSize: 12, color: textMuted, padding: '4px 10px', borderRadius: 20,
                         background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(61,126,255,0.06)',
                         border: `1px solid ${cardBorder}`
                       }}>{d}</span>
@@ -534,11 +487,11 @@ const Sidebar = () => {
                 </div>
               </div>
 
-              {/* AI Clinical Report — formal physician-facing Gemini output */}
+              {/* AI Clinical Report */}
               {data.clinical_report && (
                 <div style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, padding: 16 }}>
                   <SectionLabel>AI Clinical Report</SectionLabel>
-                  <p style={{ fontSize: 13, color: isDark ? 'rgba(255,255,255,0.55)' : '#3A5A8E', lineHeight: 1.75 }}>
+                  <p style={{ fontSize: 14, color: isDark ? 'rgba(255,255,255,0.55)' : '#3A5A8E', lineHeight: 1.75 }}>
                     {data.clinical_report}
                   </p>
                 </div>
@@ -548,24 +501,23 @@ const Sidebar = () => {
             {/* ════ Right column ════ */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-              {/* Patient symptoms — entered by clinician at submission */}
+              {/* Patient symptoms */}
               <div style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, padding: 16 }}>
                 <SectionLabel>Patient Symptoms</SectionLabel>
-                <p style={{ fontSize: 13, color: isDark ? 'rgba(255,255,255,0.5)' : '#3A5A8E', lineHeight: 1.7 }}>
+                <p style={{ fontSize: 14, color: isDark ? 'rgba(255,255,255,0.5)' : '#3A5A8E', lineHeight: 1.7 }}>
                   {data.symptoms || <span style={{ fontStyle: 'italic', color: textMuted }}>No symptoms reported.</span>}
                 </p>
               </div>
 
-              {/* Clinician notes — optional context from the uploading clinician */}
+              {/* Clinician notes */}
               <div style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, padding: 16 }}>
                 <SectionLabel>Clinician Notes</SectionLabel>
-                <p style={{ fontSize: 13, color: isDark ? 'rgba(255,255,255,0.5)' : '#3A5A8E', lineHeight: 1.7 }}>
+                <p style={{ fontSize: 14, color: isDark ? 'rgba(255,255,255,0.5)' : '#3A5A8E', lineHeight: 1.7 }}>
                   {data.clinician_notes || <span style={{ fontStyle: 'italic', color: textMuted }}>No notes provided.</span>}
                 </p>
               </div>
 
-              {/* Physician assessment textarea
-                  Disabled after sending — Gemini converts this to plain language for the patient */}
+              {/* Physician assessment */}
               <div style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, padding: 16 }}>
                 <SectionLabel>Your Assessment</SectionLabel>
                 <textarea
@@ -576,7 +528,7 @@ const Sidebar = () => {
                   disabled={sent}
                   style={{
                     width: '100%', borderRadius: 10, padding: '10px 14px',
-                    fontSize: 13, color: isDark ? 'rgba(255,255,255,0.7)' : '#0A1628',
+                    fontSize: 14, color: isDark ? 'rgba(255,255,255,0.7)' : '#0A1628',
                     background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(240,245,255,0.8)',
                     border: `1px solid ${cardBorder}`,
                     outline: 'none', resize: 'none',
@@ -585,14 +537,12 @@ const Sidebar = () => {
                     boxSizing: 'border-box', lineHeight: 1.6
                   }}
                 />
-                <p style={{ fontSize: 11, color: textMuted, marginTop: 6 }}>
+                <p style={{ fontSize: 12, color: textMuted, marginTop: 6 }}>
                   Gemini will rewrite this into plain language for the patient.
                 </p>
               </div>
 
-              {/* Matched clinical trials
-                  Multi-factor scored via ClinicalTrials.gov
-                  Clicking opens the trial on clinicaltrials.gov */}
+              {/* Matched clinical trials */}
               {data.trials && data.trials.length > 0 && (
                 <div style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, padding: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -624,15 +574,13 @@ const Sidebar = () => {
                           e.currentTarget.style.background = innerBg;
                         }}
                       >
-                        {/* Trial name + match score badge */}
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
-                          <p style={{ fontSize: 12, fontWeight: 600, color: isDark ? 'rgba(255,255,255,0.75)' : '#1A3A6E', lineHeight: 1.45, flex: 1 }}>
+                          <p style={{ fontSize: 13, fontWeight: 700, color: isDark ? 'rgba(255,255,255,0.75)' : '#1A3A6E', lineHeight: 1.45, flex: 1 }}>
                             {trial.name}
                           </p>
-                          {/* Color-coded match score: green ≥70%, amber ≥40%, gray <40% */}
                           {trial.match_score !== undefined && (
                             <span style={{
-                              fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 20, flexShrink: 0,
+                              fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 20, flexShrink: 0,
                               color: trial.match_score >= 70 ? '#10B981' : trial.match_score >= 40 ? '#F59E0B' : '#9CA3AF',
                               background: trial.match_score >= 70 ? 'rgba(16,185,129,0.1)' : trial.match_score >= 40 ? 'rgba(245,158,11,0.1)' : 'rgba(156,163,175,0.1)',
                               border: `1px solid ${trial.match_score >= 70 ? 'rgba(16,185,129,0.25)' : trial.match_score >= 40 ? 'rgba(245,158,11,0.25)' : 'rgba(156,163,175,0.2)'}`
@@ -642,23 +590,22 @@ const Sidebar = () => {
                           )}
                         </div>
 
-                        {/* Status, phase, location badges */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                           <span style={{
-                            fontSize: 10, padding: '2px 8px', borderRadius: 20,
+                            fontSize: 11, padding: '2px 8px', borderRadius: 20,
                             color: '#10B981', background: 'rgba(16,185,129,0.1)',
                             border: '1px solid rgba(16,185,129,0.2)'
                           }}>{trial.status}</span>
                           {trial.phase && trial.phase !== 'N/A' && (
                             <span style={{
-                              fontSize: 10, padding: '2px 8px', borderRadius: 20,
+                              fontSize: 11, padding: '2px 8px', borderRadius: 20,
                               color: '#6FA3FF', background: 'rgba(61,126,255,0.1)',
                               border: '1px solid rgba(61,126,255,0.2)'
                             }}>{trial.phase}</span>
                           )}
-                          <span style={{ fontSize: 11, color: textMuted }}>{trial.location}</span>
+                          <span style={{ fontSize: 12, color: textMuted }}>{trial.location}</span>
                           {trial.nct_id && (
-                            <span style={{ fontSize: 11, color: '#6FA3FF', marginLeft: 'auto', fontWeight: 600 }}>
+                            <span style={{ fontSize: 12, color: '#6FA3FF', marginLeft: 'auto', fontWeight: 600 }}>
                               View →
                             </span>
                           )}
@@ -669,15 +616,13 @@ const Sidebar = () => {
                 </div>
               )}
 
-              {/* Send to Patient button
-                  Disabled after sending — triggers /api/approve which runs Gemini
-                  and transitions the patient to phase 2 */}
+              {/* Send to Patient button */}
               <button
                 onClick={handleSend}
                 disabled={sending || sent}
                 style={{
                   width: '100%', padding: '15px', borderRadius: 12,
-                  fontSize: 14, fontWeight: 700,
+                  fontSize: 16, fontWeight: 700,                    // CHANGED: 14→16
                   cursor: sent ? 'default' : 'pointer',
                   fontFamily: 'Syne, sans-serif',
                   transition: 'all 0.2s',

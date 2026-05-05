@@ -57,18 +57,6 @@ const Textarea = ({ ...props }) => (
 // Step indicator component
 // ---------------------------------------------------------------------------
 
-/**
- * Single step in the progress indicator at the top of the page.
- *
- * Shows a numbered circle that becomes a checkmark when completed,
- * and a label below. Adapts colors to the current theme.
- *
- * Props:
- *   step      - Step number to display (1, 2, 3)
- *   label     - Text label below the circle
- *   active    - True if this is the current step
- *   completed - True if this step has been completed
- */
 function StepIndicator({ step, label, active, completed }) {
   const isDark = document.body.getAttribute('data-theme') !== 'light';
 
@@ -102,7 +90,8 @@ function StepIndicator({ step, label, active, completed }) {
           </svg>
         ) : step}
       </div>
-      <span className="text-xs" style={{color: labelColor, fontFamily: 'Syne, sans-serif'}}>
+      {/* CHANGED: font size text-xs → text-sm */}
+      <span className="text-sm" style={{color: labelColor, fontFamily: 'Syne, sans-serif'}}>
         {label}
       </span>
     </div>
@@ -132,7 +121,6 @@ export default function Clinician() {
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState(null);
 
-  // Force re-render when theme changes (for StepIndicator color adaptation)
   const [, forceUpdate] = useState(0);
   useEffect(() => {
     const observer = new MutationObserver(() => forceUpdate(n => n + 1));
@@ -140,7 +128,6 @@ export default function Clinician() {
     return () => observer.disconnect();
   }, []);
 
-  // Generate a stable UUID for this session — regenerated on "Submit Another Case"
   const patientId = useRef(`P-${crypto.randomUUID()}`);
 
 
@@ -148,10 +135,6 @@ export default function Clinician() {
   // File handling
   // ---------------------------------------------------------------------------
 
-  /**
-   * Handles file selection from drag-and-drop or file input.
-   * Creates a local object URL for the preview image.
-   */
   const handleFile = (file) => {
     if (!file) return;
     setImage(file);
@@ -163,22 +146,14 @@ export default function Clinician() {
   // Form submission
   // ---------------------------------------------------------------------------
 
-  /**
-   * Submits the scan and patient data to the backend pipeline.
-   *
-   * Animates a progress bar while the request is in flight.
-   * On success, sets the result state which triggers the success screen.
-   */
   const handleSubmit = async () => {
     setLoading(true);
     setProgress(0);
 
-    // Animate progress bar — increments randomly up to 90% while request is in flight
     const interval = setInterval(() => {
       setProgress(p => p >= 90 ? 90 : p + Math.random() * 15);
     }, 300);
 
-    // Build multipart form data
     const formData = new FormData();
     formData.append("image", image);
     formData.append("symptoms", symptoms);
@@ -187,7 +162,7 @@ export default function Clinician() {
     formData.append("patient_id", patientId.current);
     formData.append("patient_name", patientName);
     formData.append("patient_location", patientLocation);
-    formData.append("patient_dob", patientDob);  // Used for generation detection
+    formData.append("patient_dob", patientDob);
 
     const res = await fetch("/api/scan", { method: "POST", body: formData });
     const data = await res.json();
@@ -206,23 +181,48 @@ export default function Clinician() {
   return (
     <div className="min-h-screen grid-bg flex flex-col items-center justify-center p-8 gap-8">
 
-      {/* Header — portal title + active session badge */}
-      {/* Header — portal title + active session badge */}
-      <div className="fade-in-up stagger-1 w-full max-w-5xl flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div style={{ width: '160px', flexShrink: 0 }}>
-            <MedEchoLogo width="160" height="auto" />
-          </div>
-          <p className="text-white/30 text-xs">Clinician Portal</p>
-        </div>
-        <div
-          className="px-3 py-1.5 rounded-full text-xs flex items-center gap-2"
-          style={{background: 'rgba(61,126,255,0.1)', border: '1px solid rgba(61,126,255,0.2)', color: '#3D7EFF', fontFamily: 'Syne, sans-serif'}}
-        >
-          <div className="w-1.5 h-1.5 rounded-full bg-[#3D7EFF]" />
-          Active Session
-        </div>
+  {/* Header */}
+  <div
+  className="fade-in-up stagger-1 w-full flex items-center justify-between"
+    style={{ height: 72 }}
+  >
+    {/* Logo + portal label */}
+    <div className="flex items-center gap-10">
+      <div style={{ width: '180px', flexShrink: 0 }}>
+        <MedEchoLogo width="180" height="66" />
       </div>
+   
+
+{/* Center title */}
+<p style={{
+  position: "absolute",
+  left: "50%",
+  transform: "translateX(-50%)",
+  fontSize: 37,
+  fontWeight: 700,
+  fontFamily: "Syne, sans-serif",
+  color: "rgba(255,255,255,0.6)",
+  margin: 0
+}}>
+  Clinician Portal
+</p>
+    </div>
+
+    {/* Active session badge */}
+    <div
+      className="px-3 py-1.5 rounded-full flex items-center gap-2"
+      style={{
+        background: 'rgba(61,126,255,0.1)',
+        border: '1px solid rgba(61,126,255,0.2)',
+        color: '#3D7EFF',
+        fontFamily: 'Syne, sans-serif',
+        fontSize: 14
+      }}
+    >
+      <div className="w-1.5 h-1.5 rounded-full bg-[#3D7EFF]" />
+      Active Session
+    </div>
+  </div>
 
       {/* Step progress indicator */}
       <div className="fade-in-up stagger-1 flex items-center gap-4">
@@ -256,7 +256,8 @@ export default function Clinician() {
                       <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                   </div>
-                  <p style={{fontFamily: 'Syne, sans-serif'}} className="text-white font-semibold text-sm">Patient Information</p>
+                  {/* CHANGED: text-sm → text-base */}
+                  <p style={{fontFamily: 'Syne, sans-serif', fontSize: 16}} className="text-white font-semibold">Patient Information</p>
                 </div>
 
                 <div>
@@ -269,7 +270,6 @@ export default function Clinician() {
                   <Input value={patientLocation} onChange={(e) => setPatientLocation(e.target.value)} placeholder="New York" />
                 </div>
 
-                {/* DOB — used to detect generational cohort for Gemini tone adaptation */}
                 <div>
                   <Label>Date of birth</Label>
                   <input
@@ -320,7 +320,6 @@ export default function Clinician() {
               {/* Right column — scan upload + pipeline info */}
               <div className="flex flex-col gap-6">
 
-                {/* Drag-and-drop scan upload area */}
                 <div className="glass rounded-3xl p-6 flex flex-col gap-4 flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{background: 'rgba(61,126,255,0.1)'}}>
@@ -328,7 +327,8 @@ export default function Clinician() {
                         <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                       </svg>
                     </div>
-                    <p style={{fontFamily: 'Syne, sans-serif'}} className="text-white font-semibold text-sm">Scan Upload</p>
+                    {/* CHANGED: text-sm → text-base */}
+                    <p style={{fontFamily: 'Syne, sans-serif', fontSize: 16}} className="text-white font-semibold">Scan Upload</p>
                   </div>
 
                   <div
@@ -347,7 +347,6 @@ export default function Clinician() {
                     {preview ? (
                       <div className="relative w-full">
                         <img src={preview} alt="Preview" className="rounded-xl object-contain w-full" style={{maxHeight: 280}} />
-                        {/* Remove image button */}
                         <button
                           onClick={(e) => { e.stopPropagation(); setImage(null); setPreview(null); }}
                           style={{
@@ -372,8 +371,10 @@ export default function Clinician() {
                           </svg>
                         </div>
                         <div className="text-center">
-                          <p className="text-white/70 text-sm font-medium">Drop X-ray or skin image</p>
-                          <p className="text-white/25 text-xs mt-1">or click to browse — PNG, JPG</p>
+                          {/* CHANGED: text-sm → text-base */}
+                          <p className="text-white/70 font-medium" style={{fontSize: 15}}>Drop X-ray or skin image</p>
+                          {/* CHANGED: text-xs → text-sm */}
+                          <p className="text-white/25 mt-1" style={{fontSize: 13}}>or click to browse — PNG, JPG</p>
                         </div>
                       </>
                     )}
@@ -381,12 +382,13 @@ export default function Clinician() {
                   </div>
                 </div>
 
-                {/* Pipeline info card — explains what happens on submit */}
+                {/* Pipeline info card */}
                 <div
                   className="rounded-2xl p-4 flex flex-col gap-3"
                   style={{background: 'rgba(61,126,255,0.05)', border: '1px dashed rgba(61,126,255,0.2)'}}
                 >
-                  <p style={{fontFamily: 'Syne, sans-serif'}} className="text-white/60 text-xs font-semibold uppercase tracking-widest">
+                  {/* CHANGED: text-xs → text-sm */}
+                  <p style={{fontFamily: 'Syne, sans-serif', fontSize: 13}} className="text-white/60 font-semibold uppercase tracking-widest">
                     What happens when you submit?
                   </p>
                   {[
@@ -400,7 +402,8 @@ export default function Clinician() {
                           <path d="M5 13l4 4L19 7"/>
                         </svg>
                       </div>
-                      <p className="text-white/40 text-xs">{item}</p>
+                      {/* CHANGED: text-xs → text-sm */}
+                      <p className="text-white/40" style={{fontSize: 13}}>{item}</p>
                     </div>
                   ))}
                 </div>
@@ -408,12 +411,13 @@ export default function Clinician() {
             </div>
           )}
 
-          {/* Progress bar — shown while scan is processing */}
+          {/* Progress bar */}
           {loading && (
             <div className="mt-6 glass rounded-2xl p-4 flex flex-col gap-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-white/40">Processing scan...</span>
-                <span className="text-[#3D7EFF] font-semibold" style={{fontFamily: 'DM Mono, monospace'}}>
+              <div className="flex items-center justify-between">
+                {/* CHANGED: text-xs → text-sm */}
+                <span className="text-white/40" style={{fontSize: 14}}>Processing scan...</span>
+                <span className="text-[#3D7EFF] font-semibold" style={{fontFamily: 'DM Mono, monospace', fontSize: 14}}>
                   {Math.round(progress)}%
                 </span>
               </div>
@@ -423,19 +427,24 @@ export default function Clinician() {
                   style={{width: `${progress}%`, background: 'linear-gradient(90deg, #3D7EFF, #2563EB)'}}
                 />
               </div>
-              <p className="text-white/25 text-xs">
+              {/* CHANGED: text-xs → text-sm */}
+              <p className="text-white/25" style={{fontSize: 13}}>
                 Running CNN inference, generating AI report, matching clinical trials...
               </p>
             </div>
           )}
 
-          {/* Submit button — disabled until image, name, and symptoms are provided */}
+          {/* Submit button */}
           <div className="flex justify-center mt-6">
             <button
               onClick={handleSubmit}
               disabled={!image || !patientName || !symptoms || loading}
-              className="px-12 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 accent-glow"
-              style={{background: 'linear-gradient(135deg, #3D7EFF, #2563EB)', fontFamily: 'Syne, sans-serif'}}
+              className="px-12 py-3 rounded-xl font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 accent-glow"
+              style={{
+                background: 'linear-gradient(135deg, #3D7EFF, #2563EB)',
+                fontFamily: 'Syne, sans-serif',
+                fontSize: 16  // CHANGED: text-sm (14px) → 16px
+              }}
             >
               {loading ? (
                 <span className="flex items-center gap-2">
@@ -451,11 +460,10 @@ export default function Clinician() {
         </div>
       )}
 
-      {/* Success screen — shown after submission completes */}
+      {/* Success screen */}
       {result && (
         <div className="fade-in-up stagger-1 w-full max-w-2xl glass rounded-3xl p-10 flex flex-col items-center gap-6 text-center">
 
-          {/* Success checkmark */}
           <div
             className="w-20 h-20 rounded-full flex items-center justify-center"
             style={{background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)'}}
@@ -466,13 +474,14 @@ export default function Clinician() {
           </div>
 
           <div>
-            <p style={{fontFamily: 'Syne, sans-serif'}} className="text-white text-2xl font-bold">Case Submitted Successfully</p>
-            <p className="text-white/30 text-sm mt-2">
+            {/* CHANGED: text-2xl → text-3xl */}
+            <p style={{fontFamily: 'Syne, sans-serif', fontSize: 28}} className="text-white font-bold">Case Submitted Successfully</p>
+            {/* CHANGED: text-sm → text-base */}
+            <p className="text-white/30 mt-2" style={{fontSize: 15}}>
               The medical report has been sent to the physician and the patient has been notified.
             </p>
           </div>
 
-          {/* Status summary lines */}
           <div className="w-full flex flex-col gap-3">
             {[
               { label: "Physician notified", desc: "AI analysis, scan and clinical notes sent for review", color: '#3D7EFF' },
@@ -493,14 +502,15 @@ export default function Clinician() {
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium" style={{fontFamily: 'Syne, sans-serif'}}>{label}</p>
-                  <p className="text-white/30 text-xs mt-0.5">{desc}</p>
+                  {/* CHANGED: text-sm → text-base */}
+                  <p className="text-white font-medium" style={{fontFamily: 'Syne, sans-serif', fontSize: 15}}>{label}</p>
+                  {/* CHANGED: text-xs → text-sm */}
+                  <p className="text-white/30 mt-0.5" style={{fontSize: 13}}>{desc}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Portal deep links — open physician and patient portals in new tabs */}
           <div className="grid grid-cols-2 gap-3 w-full">
             {[
               { label: "Physician Portal", id: "physician", desc: "Review AI report & approve", color: '#3D7EFF' },
@@ -512,9 +522,11 @@ export default function Clinician() {
                 className="rounded-2xl p-4 text-left transition-all hover:opacity-80"
                 style={{background: `${color}10`, border: `1px solid ${color}25`, cursor: 'pointer'}}
               >
-                <p style={{fontFamily: 'Syne, sans-serif'}} className="text-white text-sm font-semibold mb-1">{label}</p>
-                <p className="text-xs mb-3" style={{color: 'rgba(255,255,255,0.3)'}}>{desc}</p>
-                <div className="flex items-center gap-1 text-xs font-medium" style={{color}}>
+                {/* CHANGED: text-sm → text-base */}
+                <p style={{fontFamily: 'Syne, sans-serif', fontSize: 15}} className="text-white font-semibold mb-1">{label}</p>
+                {/* CHANGED: text-xs → text-sm */}
+                <p className="mb-3" style={{color: 'rgba(255,255,255,0.3)', fontSize: 13}}>{desc}</p>
+                <div className="flex items-center gap-1 font-medium" style={{color, fontSize: 13}}>
                   Open portal
                   <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M7 17L17 7M17 7H7M17 7v10"/>
@@ -524,7 +536,6 @@ export default function Clinician() {
             ))}
           </div>
 
-          {/* Reset — clears all state and generates a new patient ID */}
           <button
             onClick={() => {
               setResult(null); setStep(1); setImage(null); setPreview(null);
@@ -532,8 +543,13 @@ export default function Clinician() {
               setSymptoms(""); setNotes("");
               patientId.current = `P-${crypto.randomUUID()}`;
             }}
-            className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
-            style={{background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', fontFamily: 'Syne, sans-serif'}}
+            className="w-full py-3 rounded-xl font-semibold text-white transition-all hover:opacity-90"
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              fontFamily: 'Syne, sans-serif',
+              fontSize: 15  // CHANGED: text-sm → 15px
+            }}
           >
             Submit Another Case
           </button>

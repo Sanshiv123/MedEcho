@@ -31,12 +31,11 @@ import Physician from './pages/Physician'
 export default function App() {
   // ---------------------------------------------------------------------------
   // Theme state
-  // Default: dark mode (matches the dark glass aesthetic across all portals)
+  // Default: light mode
   // ---------------------------------------------------------------------------
   const [dark, setDark] = useState(false)
 
   // Sync theme state to document.body data-theme attribute
-  // All portal components read this attribute to adapt colors
   useEffect(() => {
     document.body.setAttribute('data-theme', dark ? 'dark' : 'light')
   }, [dark])
@@ -44,52 +43,45 @@ export default function App() {
   return (
     <BrowserRouter>
 
-      {/* ── Global theme toggle button ──
-          Fixed top-right, visible on all pages.
-          data-print-hide removes it from PDF exports.
-          Toggles between dark (🌙) and light (☀️) modes. */}
-      <button
+      {/* ── Global theme toggle — sliding pill ── */}
+      <div
         data-print-hide
         onClick={() => setDark(!dark)}
         title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
         style={{
-          position: 'fixed', top: 14, right: 16, zIndex: 9999,
-          width: 32, height: 32, borderRadius: 8,
-          background: 'transparent', border: 'none',
-          cursor: 'pointer', fontSize: 18,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          opacity: 0.5, transition: 'opacity 0.15s ease, transform 0.15s ease',
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.opacity = '1'
-          e.currentTarget.style.transform = 'scale(1.15)'
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.opacity = '0.5'
-          e.currentTarget.style.transform = 'scale(1)'
+          position: 'fixed', top: 90, right: 18, zIndex: 9999,
+          width: 52, height: 28, borderRadius: 14,
+          background: dark ? '#7F77DD' : '#CBD5E1',
+          cursor: 'pointer',
+          transition: 'background 0.3s ease',
+          boxShadow: dark ? '0 0 10px rgba(127,119,221,0.4)' : 'none',
+          flexShrink: 0,
         }}
       >
-        🎨
-      </button>
+        {/* Sliding knob */}
+        <div style={{
+          position: 'absolute',
+          top: 4,
+          left: dark ? 28 : 4,
+          width: 20, height: 20,
+          borderRadius: '50%',
+          background: 'white',
+          transition: 'left 0.3s ease',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.25)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 11,
+        }}>
+          {dark ? '🌙' : '☀️'}
+        </div>
+      </div>
 
       {/* ── Application routes ── */}
       <Routes>
-        {/* Public landing page — role selector modal */}
         <Route path="/" element={<Landing />} />
-
-        {/* Clinician portal — scan upload and submission */}
         <Route path="/clinician" element={<Clinician />} />
-
-        {/* Physician portal — no patient pre-selected, shows sidebar + empty state */}
         <Route path="/physician" element={<Physician />} />
-
-        {/* Physician portal — patient pre-loaded via deep link from clinician portal */}
         <Route path="/physician/:patientId" element={<Physician />} />
-
-        {/* Patient portal — manual ID entry screen */}
         <Route path="/patient" element={<Patient />} />
-
-        {/* Patient portal — patient pre-loaded via deep link from clinician portal */}
         <Route path="/patient/:patientId" element={<Patient />} />
       </Routes>
 

@@ -217,18 +217,21 @@ export default function Landing() {
       {/* ── Navbar ── */}
       <nav style={{
         position: "sticky", top: 0, zIndex: 100,
-        padding: "0 48px", height: 64,
+        padding: "0 48px", height: 72,
         display: "flex", alignItems: "center", justifyContent: "space-between",
         background: navBg,
         backdropFilter: "blur(20px)",
         borderBottom: `1px solid ${cardBorder}`
       }}>
-        <MedEchoLogo width={120} height={44} />
+        {/* CHANGED: logo width 120→180, height 44→66 */}
+        <MedEchoLogo width={180} height={66} />
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <button onClick={openModal} style={{ padding: "8px 20px", borderRadius: 8, fontSize: 14, fontWeight: 600, background: "transparent", border: "none", color: textMuted, cursor: "pointer" }}>
+          {/* CHANGED: font size 14→16 */}
+          <button onClick={openModal} style={{ padding: "8px 20px", borderRadius: 8, fontSize: 16, fontWeight: 600, background: "transparent", border: "none", color: textMuted, cursor: "pointer" }}>
             Log In
           </button>
-          <button onClick={openModal} style={{ padding: "10px 24px", borderRadius: 10, fontSize: 14, fontWeight: 700, background: "linear-gradient(135deg,#7F77DD,#5A52B8)", color: "white", border: "none", cursor: "pointer", fontFamily: "Syne, sans-serif", boxShadow: "0 4px 14px rgba(127,119,221,0.35)" }}>
+          {/* CHANGED: font size 14→16 */}
+          <button onClick={openModal} style={{ padding: "10px 24px", borderRadius: 10, fontSize: 16, fontWeight: 700, background: "linear-gradient(135deg,#7F77DD,#5A52B8)", color: "white", border: "none", cursor: "pointer", fontFamily: "Syne, sans-serif", boxShadow: "0 4px 14px rgba(127,119,221,0.35)" }}>
             Sign Up
           </button>
         </div>
@@ -239,7 +242,8 @@ export default function Landing() {
         {/* ── Hero — animated logo centered with tagline and CTA ── */}
         <section style={{ minHeight: "80vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "60px 40px 48px" }}>
           <MedEchoLogo width={520} height="auto" />
-          <p style={{ fontSize: 17, color: textMuted, margin: "8px 0 28px", letterSpacing: "0.3px" }}>
+          {/* CHANGED: font size 17→21 */}
+          <p style={{ fontSize: 21, color: textMuted, margin: "8px 0 28px", letterSpacing: "0.3px" }}>
             Medical Results, Human Understanding
           </p>
 
@@ -248,16 +252,19 @@ export default function Landing() {
             <svg width="14" height="14" fill="none" stroke="#7F77DD" strokeWidth="2" viewBox="0 0 24 24">
               <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#7F77DD" }}>HIPAA Compliant Healthcare Platform</span>
+            {/* CHANGED: font size 13→15 */}
+            <span style={{ fontSize: 15, fontWeight: 600, color: "#7F77DD" }}>HIPAA Compliant Healthcare Platform</span>
           </div>
 
-          <p style={{ fontSize: 20, color: textMuted, maxWidth: 620, lineHeight: 1.75, marginBottom: 44 }}>
+          {/* CHANGED: font size 20→23 */}
+          <p style={{ fontSize: 23, color: textMuted, maxWidth: 620, lineHeight: 1.75, marginBottom: 44 }}>
             Bridge the gap between radiology results and patient understanding. AI triage for clinicians and physicians — compassionate explanations for patients.
           </p>
 
+          {/* CHANGED: font size 17→20 */}
           <button
             onClick={openModal}
-            style={{ padding: "16px 48px", borderRadius: 12, fontSize: 17, fontWeight: 700, background: "linear-gradient(135deg,#7F77DD,#5A52B8)", color: "white", border: "none", cursor: "pointer", fontFamily: "Syne, sans-serif", boxShadow: "0 6px 24px rgba(127,119,221,0.4)", letterSpacing: "0.3px" }}
+            style={{ padding: "16px 48px", borderRadius: 12, fontSize: 20, fontWeight: 700, background: "linear-gradient(135deg,#7F77DD,#5A52B8)", color: "white", border: "none", cursor: "pointer", fontFamily: "Syne, sans-serif", boxShadow: "0 6px 24px rgba(127,119,221,0.4)", letterSpacing: "0.3px" }}
           >
             Get Started
           </button>
@@ -265,10 +272,12 @@ export default function Landing() {
 
         {/* ── Features — 3x2 card grid ── */}
         <section style={{ padding: "60px 60px 48px", textAlign: "center" }}>
-          <p style={{ fontFamily: "sans-serif", fontSize: 30, fontWeight: 800, color: textPrimary, marginBottom: 10 }}>
+          {/* CHANGED: font size 30→36 */}
+          <p style={{ fontFamily: "sans-serif", fontSize: 36, fontWeight: 800, color: textPrimary, marginBottom: 10 }}>
             Designed for Compassionate Care
           </p>
-          <p style={{ fontSize: 17, color: textMuted, maxWidth: 520, margin: "0 auto 44px", lineHeight: 1.7 }}>
+          {/* CHANGED: font size 17→20 */}
+          <p style={{ fontSize: 20, color: textMuted, maxWidth: 520, margin: "0 auto 44px", lineHeight: 1.7 }}>
             Every feature built to reduce patient anxiety and improve care team communication.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, maxWidth: 1080, margin: "0 auto" }}>
@@ -282,8 +291,10 @@ export default function Landing() {
                 <div style={{ width: 46, height: 46, borderRadius: 12, background: dark ? "rgba(127,119,221,0.1)" : "rgba(127,119,221,0.07)", border: `1px solid ${dark ? "rgba(127,119,221,0.2)" : "rgba(127,119,221,0.15)"}`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16, fontSize: 22 }}>
                   {icon}
                 </div>
-                <p style={{ fontFamily: "Syne, sans-serif", fontSize: 16, fontWeight: 700, color: textPrimary, marginBottom: 8 }}>{title}</p>
-                <p style={{ fontSize: 14, color: textMuted, lineHeight: 1.7 }}>{desc}</p>
+                {/* CHANGED: font size 16→18 */}
+                <p style={{ fontFamily: "Syne, sans-serif", fontSize: 18, fontWeight: 700, color: textPrimary, marginBottom: 8 }}>{title}</p>
+                {/* CHANGED: font size 14→16 */}
+                <p style={{ fontSize: 16, color: textMuted, lineHeight: 1.7 }}>{desc}</p>
               </div>
             ))}
           </div>
@@ -291,10 +302,12 @@ export default function Landing() {
 
         {/* ── How it works — numbered steps ── */}
         <section style={{ padding: "48px 60px", textAlign: "center" }}>
-          <p style={{ fontFamily: "sans-serif", fontSize: 30, fontWeight: 800, color: textPrimary, marginBottom: 10 }}>
+          {/* CHANGED: font size 30→36 */}
+          <p style={{ fontFamily: "sans-serif", fontSize: 36, fontWeight: 800, color: textPrimary, marginBottom: 10 }}>
             How It Works
           </p>
-          <p style={{ fontSize: 17, color: textMuted, marginBottom: 48 }}>
+          {/* CHANGED: font size 17→20 */}
+          <p style={{ fontSize: 20, color: textMuted, marginBottom: 48 }}>
             A seamless workflow from scan upload to patient understanding.
           </p>
           <div style={{ maxWidth: 700, margin: "0 auto", display: "flex", flexDirection: "column", gap: 28 }}>
@@ -305,8 +318,10 @@ export default function Landing() {
                   <span style={{ fontFamily: "Syne, sans-serif", fontSize: 17, fontWeight: 700, color: "white" }}>{n}</span>
                 </div>
                 <div style={{ paddingTop: 4 }}>
-                  <p style={{ fontFamily: "Syne, sans-serif", fontSize: 17, fontWeight: 700, color: textPrimary, marginBottom: 6 }}>{title}</p>
-                  <p style={{ fontSize: 15, color: textMuted, lineHeight: 1.7 }}>{desc}</p>
+                  {/* CHANGED: font size 17→20 */}
+                  <p style={{ fontFamily: "Syne, sans-serif", fontSize: 20, fontWeight: 700, color: textPrimary, marginBottom: 6 }}>{title}</p>
+                  {/* CHANGED: font size 15→17 */}
+                  <p style={{ fontSize: 17, color: textMuted, lineHeight: 1.7 }}>{desc}</p>
                 </div>
               </div>
             ))}
@@ -315,10 +330,12 @@ export default function Landing() {
 
         {/* ── Portal breakdown — by role ── */}
         <section style={{ padding: "48px 60px", textAlign: "center" }}>
-          <p style={{ fontFamily: "sans-serif", fontSize: 30, fontWeight: 800, color: textPrimary, marginBottom: 10 }}>
+          {/* CHANGED: font size 30→36 */}
+          <p style={{ fontFamily: "sans-serif", fontSize: 36, fontWeight: 800, color: textPrimary, marginBottom: 10 }}>
             Built for Every Role
           </p>
-          <p style={{ fontSize: 17, color: textMuted, marginBottom: 44 }}>
+          {/* CHANGED: font size 17→20 */}
+          <p style={{ fontSize: 20, color: textMuted, marginBottom: 44 }}>
             Dedicated portals for the specific needs of each user.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, maxWidth: 900, margin: "0 auto" }}>
@@ -328,14 +345,16 @@ export default function Landing() {
               { role: "For Patients",   color: "#1D9E75", items: ["View scan immediately", "Hear Phase 1 summary via avatar", "Receive full results after review", "Supports 4 languages"] },
             ].map(({ role, color, items }) => (
               <div key={role} style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, padding: "24px 22px", textAlign: "left", backdropFilter: "blur(12px)" }}>
-                <p style={{ fontFamily: "Syne, sans-serif", fontSize: 16, fontWeight: 700, color: textPrimary, marginBottom: 16 }}>{role}</p>
+                {/* CHANGED: font size 16→18 */}
+                <p style={{ fontFamily: "Syne, sans-serif", fontSize: 18, fontWeight: 700, color: textPrimary, marginBottom: 16 }}>{role}</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {items.map(item => (
                     <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 9 }}>
                       <svg width="16" height="16" fill="none" stroke={color} strokeWidth="2.5" viewBox="0 0 24 24" style={{ flexShrink: 0, marginTop: 2 }}>
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <p style={{ fontSize: 14, color: textMuted, lineHeight: 1.55 }}>{item}</p>
+                      {/* CHANGED: font size 14→16 */}
+                      <p style={{ fontSize: 16, color: textMuted, lineHeight: 1.55 }}>{item}</p>
                     </div>
                   ))}
                 </div>
@@ -347,15 +366,18 @@ export default function Landing() {
         {/* ── Bottom CTA ── */}
         <section style={{ padding: "40px 60px 80px" }}>
           <div style={{ maxWidth: 660, margin: "0 auto", background: dark ? "rgba(127,119,221,0.06)" : "rgba(127,119,221,0.05)", border: `1px solid ${dark ? "rgba(127,119,221,0.15)" : "rgba(127,119,221,0.18)"}`, borderRadius: 20, padding: "52px 40px", textAlign: "center", backdropFilter: "blur(12px)" }}>
-            <p style={{ fontFamily: "sans-serif", fontSize: 26, fontWeight: 800, color: textPrimary, marginBottom: 12 }}>
+            {/* CHANGED: font size 26→32 */}
+            <p style={{ fontFamily: "sans-serif", fontSize: 32, fontWeight: 800, color: textPrimary, marginBottom: 12 }}>
               Ready to Transform Patient Communication?
             </p>
-            <p style={{ fontSize: 16, color: textMuted, marginBottom: 28, lineHeight: 1.7 }}>
+            {/* CHANGED: font size 16→19 */}
+            <p style={{ fontSize: 25, color: textMuted, marginBottom: 28, lineHeight: 1.7 }}>
               Join healthcare teams using MedEcho to bridge the gap between medical results and patient understanding.
             </p>
+            {/* CHANGED: font size 15→18 */}
             <button
               onClick={openModal}
-              style={{ padding: "14px 36px", borderRadius: 10, fontSize: 15, fontWeight: 700, background: "linear-gradient(135deg,#7F77DD,#5A52B8)", color: "white", border: "none", cursor: "pointer", fontFamily: "Syne, sans-serif", boxShadow: "0 4px 16px rgba(127,119,221,0.35)" }}
+              style={{ padding: "14px 36px", borderRadius: 10, fontSize: 18, fontWeight: 700, background: "linear-gradient(135deg,#7F77DD,#5A52B8)", color: "white", border: "none", cursor: "pointer", fontFamily: "Syne, sans-serif", boxShadow: "0 4px 16px rgba(127,119,221,0.35)" }}
             >
               Create Your Account
             </button>
@@ -364,8 +386,10 @@ export default function Landing() {
 
         {/* ── Footer ── */}
         <footer style={{ padding: "20px 60px", borderTop: `1px solid ${cardBorder}`, display: "flex", alignItems: "center", justifyContent: "space-between", background: dark ? "rgba(6,14,26,0.5)" : "rgba(255,255,255,0.5)", backdropFilter: "blur(12px)" }}>
-          <MedEchoLogo width={120} height={44} />
-          <p style={{ fontSize: 13, color: textMuted }}>
+          {/* CHANGED: logo width 120→180, height 44→66 */}
+          <MedEchoLogo width={180} height={66} />
+          {/* CHANGED: font size 13→15 */}
+          <p style={{ fontSize: 15, color: textMuted }}>
             Bridging the gap between medical results and patient understanding.
           </p>
         </footer>
