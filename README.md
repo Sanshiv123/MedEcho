@@ -171,7 +171,6 @@ Create a `.env` file in the project root:
 ```
 GEMINI_API_KEY=your_key_here
 ELEVENLABS_API_KEY=your_key_here
-HEYGEN_API_KEY=your_key_here
 LIVEAVATAR_API_KEY=your_key_here
 LIVEAVATAR_CONTEXT_ID=your_context_id_here
 ```
@@ -180,7 +179,6 @@ LIVEAVATAR_CONTEXT_ID=your_context_id_here
 |---|---|
 | `GEMINI_API_KEY` | [Google AI Studio](https://aistudio.google.com) → Get API Key |
 | `ELEVENLABS_API_KEY` | [ElevenLabs](https://elevenlabs.io) → Profile → API Keys |
-| `HEYGEN_API_KEY` | [HeyGen](https://app.heygen.com) → Settings → API |
 | `LIVEAVATAR_API_KEY` | Same HeyGen dashboard → LiveAvatar section |
 | `LIVEAVATAR_CONTEXT_ID` | HeyGen → LiveAvatar → Create Context → Copy ID |
 
